@@ -1,0 +1,722 @@
+[
+  {
+    "userId": 1,
+    "date": "2024-01-01",
+    "breakfast": 5.63,
+    "lunch": 16.58,
+    "dinner": 19.64,
+    "other": 4.2,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-02",
+    "breakfast": 3.78,
+    "lunch": 20.72,
+    "dinner": 11.72,
+    "other": 10.12,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-03",
+    "breakfast": 4.97,
+    "lunch": 11.83,
+    "dinner": 16.97,
+    "other": 0.42,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-04",
+    "breakfast": 6.28,
+    "lunch": 13.56,
+    "dinner": 19.98,
+    "other": 0.9,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-05",
+    "breakfast": 3.84,
+    "lunch": 22.31,
+    "dinner": 11.48,
+    "other": 9.87,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-06",
+    "breakfast": 7.44,
+    "lunch": 24.82,
+    "dinner": 8.7,
+    "other": 11.98,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-07",
+    "breakfast": 3.7,
+    "lunch": 17.36,
+    "dinner": 11.95,
+    "other": 8.68,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-08",
+    "breakfast": 8.47,
+    "lunch": 14.76,
+    "dinner": 12.2,
+    "other": 0.78,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-09",
+    "breakfast": 9.62,
+    "lunch": 19.98,
+    "dinner": 11.52,
+    "other": 13.52,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-10",
+    "breakfast": 10.12,
+    "lunch": 12.55,
+    "dinner": 11.27,
+    "other": 0.08,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-11",
+    "breakfast": 10.0,
+    "lunch": 10.26,
+    "dinner": 13.14,
+    "other": 0.41,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-12",
+    "breakfast": 7.69,
+    "lunch": 21.49,
+    "dinner": 9.0,
+    "other": 12.14,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-13",
+    "breakfast": 3.38,
+    "lunch": 16.48,
+    "dinner": 16.99,
+    "other": 10.44,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-14",
+    "breakfast": 6.93,
+    "lunch": 21.48,
+    "dinner": 11.59,
+    "other": 13.18,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-15",
+    "breakfast": 4.04,
+    "lunch": 21.51,
+    "dinner": 12.35,
+    "other": 3.61,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-16",
+    "breakfast": 9.97,
+    "lunch": 19.58,
+    "dinner": 13.59,
+    "other": 4.02,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-17",
+    "breakfast": 4.22,
+    "lunch": 24.3,
+    "dinner": 10.94,
+    "other": 8.34,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-18",
+    "breakfast": 5.39,
+    "lunch": 17.0,
+    "dinner": 16.82,
+    "other": 3.49,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-19",
+    "breakfast": 10.59,
+    "lunch": 23.63,
+    "dinner": 14.38,
+    "other": 4.6,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-20",
+    "breakfast": 3.36,
+    "lunch": 14.25,
+    "dinner": 14.19,
+    "other": 0.58,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-21",
+    "breakfast": 3.9,
+    "lunch": 16.68,
+    "dinner": 13.0,
+    "other": 3.26,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-22",
+    "breakfast": 6.33,
+    "lunch": 12.18,
+    "dinner": 19.76,
+    "other": 3.15,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-23",
+    "breakfast": 11.48,
+    "lunch": 24.86,
+    "dinner": 12.96,
+    "other": 6.16,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-24",
+    "breakfast": 11.74,
+    "lunch": 14.61,
+    "dinner": 16.87,
+    "other": 11.12,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-25",
+    "breakfast": 11.02,
+    "lunch": 12.09,
+    "dinner": 10.36,
+    "other": 12.51,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-26",
+    "breakfast": 9.74,
+    "lunch": 19.57,
+    "dinner": 12.31,
+    "other": 4.55,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-27",
+    "breakfast": 8.97,
+    "lunch": 10.69,
+    "dinner": 11.3,
+    "other": 9.61,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-28",
+    "breakfast": 4.59,
+    "lunch": 11.01,
+    "dinner": 13.42,
+    "other": 0.06,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-29",
+    "breakfast": 11.23,
+    "lunch": 22.69,
+    "dinner": 15.43,
+    "other": 8.57,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-30",
+    "breakfast": 11.23,
+    "lunch": 20.52,
+    "dinner": 11.21,
+    "other": 7.0,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-01-31",
+    "breakfast": 4.71,
+    "lunch": 12.49,
+    "dinner": 13.55,
+    "other": 4.92,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-02-01",
+    "breakfast": 11.77,
+    "lunch": 21.13,
+    "dinner": 18.95,
+    "other": 7.13,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-02-02",
+    "breakfast": 9.81,
+    "lunch": 16.96,
+    "dinner": 15.16,
+    "other": 10.73,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-02-03",
+    "breakfast": 8.29,
+    "lunch": 20.1,
+    "dinner": 16.39,
+    "other": 9.12,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-02-04",
+    "breakfast": 11.35,
+    "lunch": 21.58,
+    "dinner": 15.5,
+    "other": 5.03,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-02-05",
+    "breakfast": 5.29,
+    "lunch": 20.68,
+    "dinner": 9.72,
+    "other": 9.06,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-02-06",
+    "breakfast": 10.63,
+    "lunch": 24.75,
+    "dinner": 19.11,
+    "other": 2.4,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-02-07",
+    "breakfast": 6.03,
+    "lunch": 14.6,
+    "dinner": 18.59,
+    "other": 1.26,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-02-08",
+    "breakfast": 5.56,
+    "lunch": 24.03,
+    "dinner": 17.64,
+    "other": 3.97,
+    "isManual": false
+  },
+  {
+    "userId": 1,
+    "date": "2024-02-09",
+    "breakfast": 7.97,
+    "lunch": 23.77,
+    "dinner": 19.55,
+    "other": 2.61,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-01",
+    "breakfast": 4.76,
+    "lunch": 21.56,
+    "dinner": 12.78,
+    "other": 6.76,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-02",
+    "breakfast": 4.44,
+    "lunch": 15.82,
+    "dinner": 8.28,
+    "other": 6.13,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-03",
+    "breakfast": 6.63,
+    "lunch": 20.51,
+    "dinner": 11.19,
+    "other": 1.94,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-04",
+    "breakfast": 7.93,
+    "lunch": 16.96,
+    "dinner": 17.71,
+    "other": 2.34,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-05",
+    "breakfast": 3.48,
+    "lunch": 17.43,
+    "dinner": 19.28,
+    "other": 0.15,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-06",
+    "breakfast": 7.32,
+    "lunch": 16.18,
+    "dinner": 12.04,
+    "other": 0.33,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-07",
+    "breakfast": 5.19,
+    "lunch": 20.86,
+    "dinner": 17.14,
+    "other": 2.41,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-08",
+    "breakfast": 6.43,
+    "lunch": 11.73,
+    "dinner": 17.87,
+    "other": 8.03,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-09",
+    "breakfast": 11.81,
+    "lunch": 11.14,
+    "dinner": 15.86,
+    "other": 12.41,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-10",
+    "breakfast": 8.18,
+    "lunch": 17.09,
+    "dinner": 12.03,
+    "other": 5.3,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-11",
+    "breakfast": 9.03,
+    "lunch": 22.96,
+    "dinner": 11.47,
+    "other": 12.09,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-12",
+    "breakfast": 5.37,
+    "lunch": 17.41,
+    "dinner": 17.38,
+    "other": 4.3,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-13",
+    "breakfast": 7.59,
+    "lunch": 12.99,
+    "dinner": 8.54,
+    "other": 1.72,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-14",
+    "breakfast": 10.51,
+    "lunch": 19.27,
+    "dinner": 11.05,
+    "other": 3.59,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-15",
+    "breakfast": 11.74,
+    "lunch": 23.18,
+    "dinner": 13.25,
+    "other": 13.11,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-16",
+    "breakfast": 5.07,
+    "lunch": 17.74,
+    "dinner": 17.53,
+    "other": 0.91,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-17",
+    "breakfast": 4.84,
+    "lunch": 23.24,
+    "dinner": 12.64,
+    "other": 1.53,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-18",
+    "breakfast": 8.03,
+    "lunch": 14.16,
+    "dinner": 17.94,
+    "other": 12.92,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-19",
+    "breakfast": 7.08,
+    "lunch": 17.81,
+    "dinner": 12.8,
+    "other": 4.9,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-20",
+    "breakfast": 6.63,
+    "lunch": 11.59,
+    "dinner": 15.14,
+    "other": 12.07,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-21",
+    "breakfast": 8.42,
+    "lunch": 19.71,
+    "dinner": 10.75,
+    "other": 4.91,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-22",
+    "breakfast": 10.63,
+    "lunch": 22.13,
+    "dinner": 15.12,
+    "other": 9.47,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-23",
+    "breakfast": 6.34,
+    "lunch": 19.98,
+    "dinner": 16.35,
+    "other": 2.82,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-24",
+    "breakfast": 7.26,
+    "lunch": 22.1,
+    "dinner": 13.59,
+    "other": 7.47,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-25",
+    "breakfast": 11.44,
+    "lunch": 22.68,
+    "dinner": 13.92,
+    "other": 6.8,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-26",
+    "breakfast": 11.47,
+    "lunch": 23.67,
+    "dinner": 16.68,
+    "other": 4.66,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-27",
+    "breakfast": 6.8,
+    "lunch": 14.25,
+    "dinner": 16.51,
+    "other": 6.47,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-28",
+    "breakfast": 4.28,
+    "lunch": 24.59,
+    "dinner": 19.18,
+    "other": 12.46,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-29",
+    "breakfast": 4.35,
+    "lunch": 23.37,
+    "dinner": 17.38,
+    "other": 11.9,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-30",
+    "breakfast": 11.96,
+    "lunch": 19.74,
+    "dinner": 14.96,
+    "other": 9.95,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-01-31",
+    "breakfast": 10.03,
+    "lunch": 17.44,
+    "dinner": 14.33,
+    "other": 4.55,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-02-01",
+    "breakfast": 3.26,
+    "lunch": 20.84,
+    "dinner": 15.49,
+    "other": 2.62,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-02-02",
+    "breakfast": 9.02,
+    "lunch": 13.08,
+    "dinner": 12.97,
+    "other": 3.4,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-02-03",
+    "breakfast": 6.34,
+    "lunch": 13.72,
+    "dinner": 17.01,
+    "other": 0.13,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-02-04",
+    "breakfast": 4.22,
+    "lunch": 21.32,
+    "dinner": 17.64,
+    "other": 13.89,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-02-05",
+    "breakfast": 8.66,
+    "lunch": 17.96,
+    "dinner": 8.57,
+    "other": 3.46,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-02-06",
+    "breakfast": 5.0,
+    "lunch": 19.02,
+    "dinner": 11.9,
+    "other": 12.07,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-02-07",
+    "breakfast": 11.34,
+    "lunch": 12.26,
+    "dinner": 14.35,
+    "other": 2.14,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-02-08",
+    "breakfast": 3.64,
+    "lunch": 17.83,
+    "dinner": 16.04,
+    "other": 3.82,
+    "isManual": false
+  },
+  {
+    "userId": 2,
+    "date": "2024-02-09",
+    "breakfast": 10.84,
+    "lunch": 18.17,
+    "dinner": 9.82,
+    "other": 0.1,
+    "isManual": false
+  }
+]

@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.HappyConsumption" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:colorAccent">#2196F3</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+</resources>
