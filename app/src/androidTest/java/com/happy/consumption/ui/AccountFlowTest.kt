@@ -13,6 +13,12 @@ import java.io.File
 import android.graphics.Bitmap
 
 class AccountFlowTest {
+    @org.junit.Before fun useChineseForFixedTextAssertions() {
+        runBlocking { (rule.activity.application as HappyApplication).language.select("zh") }
+        rule.waitUntil(15000) { rule.activity.resources.configuration.locales[0].language == "zh" }
+        rule.waitForIdle()
+    }
+
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
     private val app get() = rule.activity.application as HappyApplication
     private fun expect(text: String) {
@@ -41,8 +47,8 @@ class AccountFlowTest {
         fill("用户名", name); fill("密码", password); click("登录"); expect("当前用户：$name")
     }
     private fun add(date: String, amount: String) {
-        click("添加过去记录"); chooseDate(date); fill("早餐（元）", amount)
-        fill("午餐（元）", "0"); fill("晚餐（元）", "0"); fill("其他（元）", "0")
+        click("添加过去记录"); chooseDate(date); fill("早餐", amount)
+        fill("午餐", "0"); fill("晚餐", "0"); fill("其他", "0")
         click("保存"); expect(date)
     }
     private fun chooseDate(date: String) {
@@ -79,7 +85,7 @@ class AccountFlowTest {
         screenshot("06-b-empty")
         val bId = app.userManager.session.value!!.id
         add("2024-01-01", "1.00"); expect("共 2 条"); screenshot("07-b-record")
-        click("删除用户"); expect("删除后数据不可恢复"); screenshot("08-delete-confirm")
+        click("删除用户"); expect(rule.activity.getString(com.happy.consumption.R.string.delete_user_warning)); screenshot("08-delete-confirm")
         click("取消"); expect("当前用户：$b"); expect("共 2 条")
         click("删除用户"); rule.onNodeWithText("确认删除").assertIsNotEnabled()
         fill("当前密码", "wrong"); click("确认删除"); expect("密码验证失败，账号未删除")

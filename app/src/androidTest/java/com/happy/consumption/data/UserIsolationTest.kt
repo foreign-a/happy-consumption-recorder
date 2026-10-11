@@ -154,19 +154,19 @@ class UserIsolationTest {
         try { a.add("2024-03-01",1,2,3,4);fail() } catch(e:UserOperationException){assertEquals(UserError.INVALID_DATE,e.reason)}
         assertEquals(original,db.notes().queryByUserAndDate(1,original.date))
         assertEquals(-1L,db.notes().insertIfAbsent(original.copy(id=0)))
-        val c=RecordConfirmation(session);c.requestModify(auto.toItem());c.acceptFirst();c.review(Amounts(999999,1,0,2))
+        val c=RecordConfirmation(session);c.requestModify(auto.toItem());c.review(Amounts(999999,1,0,2))
         val newer=UserRepository(manager,db,session,java.time.Clock.offset(clock,java.time.Duration.ofSeconds(5)))
         newer.modify(c.confirmModify())
         val changed=db.notes().queryByIdAndUser(auto.id,1)!!
         assertEquals(auto.id,changed.id);assertEquals(auto.date,changed.date);assertEquals(auto.userId,changed.userId)
         assertTrue(changed.isManual);assertEquals(clock.millis()+5000,changed.updatedAt)
         assertFalse(a.ensureToday());assertEquals(changed,db.notes().queryByIdAndUser(auto.id,1))
-        c.requestModify(changed.toItem());c.acceptFirst();c.review(Amounts(1,2,3,4));val oldPermit=c.confirmModify()
+        c.requestModify(changed.toItem());c.review(Amounts(1,2,3,4));val oldPermit=c.confirmModify()
         c.requestDelete(changed.toItem());val oldDelete=c.confirmDelete()
         manager.logout();manager.login("B","fixture-B")
         val b=UserRepository(manager,db,manager.session.value!!,clock);assertTrue(b.ensureToday())
         denied { a.ensureToday() };denied { a.modify(oldPermit) };denied { a.delete(oldDelete) }
-        val foreign=RecordConfirmation(manager.session.value!!);foreign.requestModify(changed.toItem());foreign.acceptFirst();foreign.review(Amounts(0,0,0,0))
+        val foreign=RecordConfirmation(manager.session.value!!);foreign.requestModify(changed.toItem());foreign.review(Amounts(0,0,0,0))
         denied { b.modify(foreign.confirmModify()) }
         foreign.requestDelete(changed.toItem());denied { b.delete(foreign.confirmDelete()) }
         manager.logout();manager.login("A","fixture-A")

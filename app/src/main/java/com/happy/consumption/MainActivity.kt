@@ -29,7 +29,8 @@ class MainActivity : AppCompatActivity() {
                 if (tag != null) {
                     AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
                     localesReady = true
-                    LogHelper.info("Startup", "SDK_INT=${android.os.Build.VERSION.SDK_INT} version=1.0.0 language=$tag")
+                    val version = packageManager.getPackageInfo(packageName, 0).versionName
+                    LogHelper.info("Startup", "SDK_INT=${android.os.Build.VERSION.SDK_INT} version=$version language=$tag")
                 }
             }
         }

@@ -14,6 +14,12 @@ import java.time.Clock
 import android.graphics.Bitmap
 
 class DatasetSmokeTest {
+    @org.junit.Before fun useChineseForFixedTextAssertions() {
+        runBlocking { (rule.activity.application as HappyApplication).language.select("zh") }
+        rule.waitUntil(15000) { rule.activity.resources.configuration.locales[0].language == "zh" }
+        rule.waitForIdle()
+    }
+
     @get:Rule val rule=createAndroidComposeRule<MainActivity>()
     private val app get()=rule.activity.application as HappyApplication
     private fun expect(text:String) { rule.waitUntil(20000){rule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()} }

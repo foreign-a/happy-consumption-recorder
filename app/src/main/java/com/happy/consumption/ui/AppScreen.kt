@@ -17,6 +17,7 @@ private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider
 }
 @Composable fun AppScreen(app: HappyApplication) {
     val auth: AppViewModel = viewModel(factory = remember { factory { AppViewModel(app.userManager) } })
+    val backup: BackupViewModel = viewModel(factory = remember { factory { BackupViewModel(app.userManager, app.contentResolver) } })
     val ready by auth.ready.collectAsState()
     val failed by auth.startupFailed.collectAsState()
     val session by auth.session.collectAsState()
@@ -25,10 +26,11 @@ private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider
             Text(stringResource(R.string.storage_error))
             Button(onClick = auth::initialize) { Text(stringResource(R.string.retry)) }
         } else CircularProgressIndicator()
-    } else if (session == null) LoginScreen(auth, app.language)
+    } else if (session == null) LoginScreen(auth, app.language, backup)
     else {
         val current = session!!
         key(current.generation) {
+            val currency by remember(current) { app.userManager.currencyFor(current) }.collectAsState(initial = com.happy.consumption.data.MoneyUnit.YUAN)
             val store = remember(current) { auth.recordsStoreFor(current) }
             val owner = remember { object : ViewModelStoreOwner { override val viewModelStore = store } }
             val records: AllRecordsViewModel = viewModel(viewModelStoreOwner = owner,
@@ -39,7 +41,9 @@ private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider
                 lifecycle.addObserver(observer)
                 onDispose { lifecycle.removeObserver(observer) }
             }
-            AllRecordsScreen(records, current.username, auth, app.language)
+            CompositionLocalProvider(LocalMoneyUnit provides currency) {
+                AllRecordsScreen(records, current.username, auth, app.language, backup)
+            }
         }
     }
 }

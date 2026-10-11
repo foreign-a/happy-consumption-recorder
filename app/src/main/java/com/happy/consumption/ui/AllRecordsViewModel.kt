@@ -21,6 +21,7 @@ class AllRecordsViewModel(private val repository: RecordsRepository, private val
     val busy = MutableStateFlow(false)
     val message = MutableStateFlow<Int?>(null)
     val addedVersion = MutableStateFlow(0)
+    val generatedCount = MutableStateFlow<Int?>(null)
     val dialog = MutableStateFlow<ConfirmationState>(ConfirmationState.Idle)
     val dates get() = repository.dates
     private val confirmation = RecordConfirmation(repository.session)
@@ -57,7 +58,7 @@ class AllRecordsViewModel(private val repository: RecordsRepository, private val
     fun retry() { LogHelper.info("Paging", "Retry requested"); refreshToday() }
     private fun operate(action: suspend () -> Unit) {
         if (busy.value || state.value.error) return
-        busy.value = true; message.value = null
+        busy.value = true; message.value = null; generatedCount.value = null
         scope.launch {
             try { action(); load() }
             catch (e: CancellationException) { throw e }
@@ -68,15 +69,18 @@ class AllRecordsViewModel(private val repository: RecordsRepository, private val
         }
     }
     fun add(date: String, breakfast: String, lunch: String, dinner: String, other: String) = operate {
-        repository.add(date, Amounts.parse(breakfast, lunch, dinner, other)); addedVersion.value++
+        repository.add(date, Amounts.adding(breakfast, lunch, dinner, other)); addedVersion.value++
     }
+    fun generatePastThirtyDays() = operate { generatedCount.value = repository.generatePastThirtyDays() }
     fun requestModify(item: ConsumptionItem) {
         if (busy.value || state.value.error || confirmation.state != ConfirmationState.Idle) return
         message.value = null; confirmation.requestModify(item); dialog.value = confirmation.state
     }
-    fun acceptFirst() { confirmation.acceptFirst(); dialog.value = confirmation.state }
     fun review(breakfast: String, lunch: String, dinner: String, other: String) {
-        try { confirmation.review(Amounts.parse(breakfast, lunch, dinner, other)); dialog.value = confirmation.state }
+        try {
+            val editing = confirmation.state as? ConfirmationState.Editing ?: throw UserOperationException(UserError.UNCONFIRMED)
+            confirmation.review(Amounts.editing(editing.item, breakfast, lunch, dinner, other)); dialog.value = confirmation.state
+        }
         catch (e: UserOperationException) { LogHelper.error("AllRecordsViewModel", "Operation failed; recovery preserved", e); message.value = errorMessage(e) }
     }
     fun confirmModify() {

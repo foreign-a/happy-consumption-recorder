@@ -15,6 +15,7 @@ class PagingAndFailureTest {
         override val changes=MutableSharedFlow<Unit>(extraBufferCapacity=8)
         val notes=(0 until 405).map { i -> ConsumptionItem(i.toLong()+1,1,LocalDate.of(2025,1,1).plusDays(i.toLong()).toString(),0,0,0,0,false,0) }.reversed().toMutableList()
         var fail=false;var writes=0
+        override suspend fun generatePastThirtyDays(): Int = 30
         override suspend fun ensureToday():Boolean { if(fail) throw IOException("read failed");return false }
         override suspend fun snapshot(pages:Int):RecordSnapshot { if(fail)throw IOException("read failed");return RecordSnapshot(notes.take(pages*200),notes.size) }
         override suspend fun add(date:String,amounts:Amounts){writes++}
@@ -48,8 +49,8 @@ class PagingAndFailureTest {
         try {
             val repo=Fake();val vm=AllRecordsViewModel(repo,scope);val item=vm.state.value.records.first()
             vm.requestModify(item);vm.cancel();assertEquals(0,repo.writes)
-            vm.requestModify(item);vm.acceptFirst();vm.review("1","2","3","4");vm.cancel();assertEquals(0,repo.writes)
-            vm.requestModify(item);vm.acceptFirst();vm.review("1","2","3","4");vm.confirmModify();assertEquals(1,repo.writes)
+            vm.requestModify(item);vm.review("1","2","3","4");vm.cancel();assertEquals(0,repo.writes)
+            vm.requestModify(item);vm.review("1","2","3","4");vm.confirmModify();assertEquals(1,repo.writes)
             vm.requestDelete(item);vm.cancel();assertEquals(1,repo.writes)
             vm.requestDelete(item);vm.confirmDelete();assertEquals(2,repo.writes);assertEquals(404,vm.state.value.count)
         } finally { scope.cancel() }

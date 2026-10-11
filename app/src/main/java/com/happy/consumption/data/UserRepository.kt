@@ -14,6 +14,7 @@ interface RecordsRepository {
     val dates: DatePolicy
     suspend fun snapshot(pages: Int): RecordSnapshot
     suspend fun ensureToday(): Boolean
+    suspend fun generatePastThirtyDays(): Int
     suspend fun add(date: String, amounts: Amounts)
     suspend fun modify(permit: ModificationPermit)
     suspend fun delete(permit: DeletionPermit)
@@ -38,6 +39,15 @@ class UserRepository(private val manager: UserManager, private val database: App
         return generated
     }
     suspend fun shouldGenerate(userId: Long, today: String) = generator.shouldGenerate(userId, today)
+    override suspend fun generatePastThirtyDays(): Int = manager.withCurrentUser(owner) { id ->
+        database.withTransaction {
+            val previous = dates.previousThirtyDays(database.notes().earliestDate(id))
+            previous.count { date ->
+                database.notes().insertIfAbsent(NoteEntity(userId = id, date = date, breakfast = 0,
+                    lunch = 0, dinner = 0, other = 0, isManual = false, updatedAt = clock.millis())) != -1L
+            }.also { count -> LogHelper.info("AutoRecord", "Past batch userId=$id count=$count result=success") }
+        }
+    }
     suspend fun queryRecords(userId: Long, limit: Int = 200, offset: Int = 0): List<NoteEntity> = manager.withCurrentUser(owner) {
         if (it != userId) { LogHelper.info("Security", "Rejected stale or unauthorized record request"); throw AccessDeniedException() }
         require(limit in 1..200 && offset >= 0)

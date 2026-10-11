@@ -19,7 +19,7 @@ import com.happy.consumption.R
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), modifier = Modifier.fillMaxWidth(),
         trailingIcon = { TextButton(onClick = { visible = !visible }) { Text(stringResource(if (visible) R.string.hide_password else R.string.show_password)) } })
 }
-@Composable fun LoginScreen(auth: AppViewModel, language: com.happy.consumption.data.LanguageSettings) {
+@Composable fun LoginScreen(auth: AppViewModel, language: com.happy.consumption.data.LanguageSettings, backup: BackupViewModel? = null) {
     var name by remember { mutableStateOf("") }; var password by remember { mutableStateOf("") }
     var creating by remember { mutableStateOf(false) }; var newName by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }; var confirmation by remember { mutableStateOf("") }
@@ -35,6 +35,7 @@ import com.happy.consumption.R
         if (message != null) Text(stringResource(message!!), color = MaterialTheme.colorScheme.error)
         Button(onClick = { auth.login(name, password) }, enabled = !busy) { Text(stringResource(R.string.login)) }
         TextButton(onClick = { auth.message.value = null; creating = true }, enabled = !busy) { Text(stringResource(R.string.create_user)) }
+        if (backup != null) BackupControl(backup, loggedIn = false)
         if (busy) CircularProgressIndicator()
     }
     if (creating) AlertDialog(onDismissRequest = { if (!busy) { creating = false; newPassword = ""; confirmation = "" } }, title = { Text(stringResource(R.string.create_user)) },

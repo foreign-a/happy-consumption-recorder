@@ -62,7 +62,9 @@ class Phase04FlowTest {
             val after=rule.onNodeWithTag("record_list").fetchSemanticsNode().config[SemanticsProperties.VerticalScrollAxisRange].value()
             assertEquals(position,after,1f)
             rule.onAllNodesWithText("¥12.35").onFirst().assertExists();shot("$code-list-position")
-            click(R.string.add_past_record);click(R.string.save);expect(text(R.string.invalid_amount));shot("$code-amount-error")
+            click(R.string.add_past_record)
+            rule.onNodeWithText(text(R.string.breakfast)).performTextReplacement("-1")
+            click(R.string.save);expect(text(R.string.invalid_amount));shot("$code-amount-error")
             click(R.string.select_date);expect(text(R.string.date_confirm));shot("$code-date-picker")
             rule.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag("date_picker"))).assertTextContains(LocalDate.now().toString())
             rule.onAllNodesWithText(text(R.string.cancel)).onLast().performClick();click(R.string.cancel)
@@ -73,7 +75,7 @@ class Phase04FlowTest {
             val repo=UserRepository(app.userManager,app.database,session)
             repo.queryByDate(session.id,"2024-01-01")
             val item=repo.queryByDate(session.id,"2024-01-01")!!.toItem()
-            val confirm=RecordConfirmation(session);confirm.requestModify(item);confirm.acceptFirst();confirm.review(Amounts(1,1234,0,0));repo.modify(confirm.confirmModify())
+            val confirm=RecordConfirmation(session);confirm.requestModify(item);confirm.review(Amounts(1,1234,0,0));repo.modify(confirm.confirmModify())
             confirm.requestDelete(item);repo.delete(confirm.confirmDelete())
             assertFalse(repo.ensureToday())
             try{repo.add("2999-01-01",Amounts(0,0,0,0));fail()}catch(_:UserOperationException){}
@@ -92,7 +94,8 @@ class Phase04FlowTest {
                 override val dates=DatePolicy(java.time.Clock.systemDefaultZone())
                 override val changes=kotlinx.coroutines.flow.emptyFlow<Unit>()
                 override suspend fun snapshot(pages:Int):RecordSnapshot { if(fails)throw NullPointerException("phase04-test-only");return RecordSnapshot(emptyList(),0) }
-                override suspend fun ensureToday():Boolean { if(fails)throw NullPointerException("phase04-test-only");return false }
+                override suspend fun generatePastThirtyDays(): Int = 30
+        override suspend fun ensureToday():Boolean { if(fails)throw NullPointerException("phase04-test-only");return false }
                 override suspend fun add(date:String,amounts:Amounts){fail("saved while unreadable")}
                 override suspend fun modify(permit:ModificationPermit){fail("modified while unreadable")}
                 override suspend fun delete(permit:DeletionPermit){fail("deleted while unreadable")}

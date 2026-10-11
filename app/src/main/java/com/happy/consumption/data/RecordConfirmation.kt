@@ -7,12 +7,18 @@ data class Amounts(val breakfast: Long, val lunch: Long, val dinner: Long, val o
     companion object {
         fun parse(breakfast: String?, lunch: String?, dinner: String?, other: String?) =
             Amounts(AmountInput.cents(breakfast), AmountInput.cents(lunch), AmountInput.cents(dinner), AmountInput.cents(other))
+        fun adding(breakfast: String, lunch: String, dinner: String, other: String) =
+            parse(breakfast.ifBlank { "0" }, lunch.ifBlank { "0" }, dinner.ifBlank { "0" }, other.ifBlank { "0" })
+        fun editing(item: ConsumptionItem, breakfast: String, lunch: String, dinner: String, other: String): Amounts {
+            fun replacement(text: String, old: Long) = if (text.isBlank()) old else AmountInput.cents(text)
+            return Amounts(replacement(breakfast, item.breakfast), replacement(lunch, item.lunch),
+                replacement(dinner, item.dinner), replacement(other, item.other)).also { it.validate() }
+        }
     }
 }
 
 sealed interface ConfirmationState {
     data object Idle : ConfirmationState
-    data class FirstModify(val item: ConsumptionItem) : ConfirmationState
     data class Editing(val item: ConsumptionItem) : ConfirmationState
     data class FinalModify(val item: ConsumptionItem, val amounts: Amounts) : ConfirmationState
     data class FirstDelete(val item: ConsumptionItem) : ConfirmationState
@@ -37,8 +43,7 @@ class DeletionPermit internal constructor(val session: UserSession, val item: Co
 class RecordConfirmation(private val session: UserSession) {
     var state: ConfirmationState = ConfirmationState.Idle
         private set
-    fun requestModify(item: ConsumptionItem) { check(state == ConfirmationState.Idle); state = ConfirmationState.FirstModify(item) }
-    fun acceptFirst() { val first = state as? ConfirmationState.FirstModify ?: throw UserOperationException(UserError.UNCONFIRMED); state = ConfirmationState.Editing(first.item) }
+    fun requestModify(item: ConsumptionItem) { check(state == ConfirmationState.Idle); state = ConfirmationState.Editing(item) }
     fun review(amounts: Amounts) {
         val editing = state as? ConfirmationState.Editing ?: throw UserOperationException(UserError.UNCONFIRMED)
         amounts.validate(); state = ConfirmationState.FinalModify(editing.item, amounts)

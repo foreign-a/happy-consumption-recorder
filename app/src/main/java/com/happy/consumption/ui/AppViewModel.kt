@@ -58,5 +58,8 @@ class AppViewModel(private val manager: UserManager) : ViewModel() {
     }
     fun login(name: String, password: String) = operate { manager.login(name, password) }
     fun logout() = operate { manager.logout() }
+    fun selectCurrency(currency: com.happy.consumption.data.MoneyUnit) = operate {
+        manager.selectCurrency(session.value ?: throw com.happy.consumption.data.AccessDeniedException(), currency)
+    }
     fun deleteUser(expected: com.happy.consumption.data.UserSession, password: String) = operate { manager.deleteCurrentUser(expected, password) }
 }

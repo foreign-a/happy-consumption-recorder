@@ -23,13 +23,15 @@ import java.util.Locale
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
-fun AllRecordsScreen(model: AllRecordsViewModel, username: String, auth: AppViewModel, language: com.happy.consumption.data.LanguageSettings? = null) {
+fun AllRecordsScreen(model: AllRecordsViewModel, username: String, auth: AppViewModel, language: com.happy.consumption.data.LanguageSettings? = null, backup: BackupViewModel? = null) {
     val data by model.state.collectAsState()
     val records = data.records
     val count = data.count
     val list = rememberLazyListState()
     val busy by model.busy.collectAsState()
     val message by model.message.collectAsState()
+    val generatedCount by model.generatedCount.collectAsState()
+    val dialog by model.dialog.collectAsState()
     var adding by remember { mutableStateOf(false) }
     var deletingUser by remember { mutableStateOf(false) }
     var deletionPassword by remember { mutableStateOf("") }
@@ -58,6 +60,10 @@ fun AllRecordsScreen(model: AllRecordsViewModel, username: String, auth: AppView
                 TextButton(onClick = { deletionSession = auth.session.value; deletionPassword = ""; auth.message.value = null; deletingUser = deletionSession != null }, enabled = !authBusy) { Text(stringResource(R.string.delete_user)) }
             }
             if (authMessage != null && !deletingUser) Text(stringResource(authMessage!!), color = MaterialTheme.colorScheme.error)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CurrencyControl(auth)
+                if (backup != null) BackupControl(backup, loggedIn = true)
+            }
             if (message != null && !adding) Text(stringResource(message!!), color = MaterialTheme.colorScheme.error)
             if (data.error) {
                 Text(stringResource(R.string.storage_error))
@@ -75,6 +81,9 @@ fun AllRecordsScreen(model: AllRecordsViewModel, username: String, auth: AppView
                 }
             }
             Text(stringResource(R.string.page_progress, records.size, count), Modifier.testTag("page_progress"))
+            TextButton(onClick = model::generatePastThirtyDays, enabled = !busy && dialog == ConfirmationState.Idle,
+                modifier = Modifier.testTag("generate_history")) { Text(stringResource(R.string.generate_history)) }
+            if (generatedCount != null) Text(stringResource(R.string.history_generated, generatedCount!!))
             if (data.loading) Text(stringResource(R.string.loading_records))
             if (records.isEmpty() && !data.loading) Text(stringResource(R.string.empty_records))
             LazyColumn(state = list, modifier = Modifier.weight(1f).testTag("record_list"), verticalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(bottom = 96.dp)) {
@@ -104,9 +113,7 @@ fun AllRecordsScreen(model: AllRecordsViewModel, username: String, auth: AppView
 
 // 以分为单位做整数拆分，显示始终保留两位小数。
 @Composable
-private fun amount(cents: Long): String = stringResource(
-    R.string.amount_format, String.format(Locale.US, "%d.%02d", cents / 100, cents % 100),
-)
+private fun amount(cents: Long): String = LocalMoneyUnit.current.format(cents)
 
 @Composable
 fun RecordCard(item: ConsumptionItem, onModify: () -> Unit, onDelete: () -> Unit, enabled: Boolean = true) {

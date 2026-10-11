@@ -15,7 +15,7 @@ import org.json.JSONObject
 import java.io.File
 
 data class UserSession(val id: Long, val username: String, val generation: Long)
-enum class UserError { EMPTY_NAME, SHORT_PASSWORD, DUPLICATE_NAME, INVALID_LOGIN, INVALID_PASSWORD, NO_SESSION, STORAGE, DATE_EXISTS, INVALID_AMOUNT, INVALID_DATE, RECORD_MISSING, UNCONFIRMED }
+enum class UserError { EMPTY_NAME, SHORT_PASSWORD, DUPLICATE_NAME, INVALID_LOGIN, INVALID_PASSWORD, NO_SESSION, STORAGE, DATE_EXISTS, INVALID_AMOUNT, INVALID_DATE, RECORD_MISSING, UNCONFIRMED, BACKUP_INVALID, BACKUP_CONFLICT }
 class UserOperationException(val reason: UserError) : Exception(reason.name)
 class AccessDeniedException : Exception("Access denied")
 
@@ -38,6 +38,12 @@ class UserManager(private val store: DataStore<Preferences>, private val databas
     private val nextKey = longPreferencesKey("next_user_id")
     private val pendingDeleteKey = longPreferencesKey("pending_delete_user_id")
     private val pendingRegisterKey = stringPreferencesKey("pending_registration_json")
+    private val pendingImportKey = stringPreferencesKey("pending_import_json")
+    private fun currencyKey(id: Long) = stringPreferencesKey("currency_$id")
+    fun currencyFor(owner: UserSession): Flow<MoneyUnit> = store.data.map { MoneyUnit.stored(it[currencyKey(owner.id)]) }.distinctUntilChanged()
+    suspend fun selectCurrency(owner: UserSession, currency: MoneyUnit) = withCurrentUser(owner) { id ->
+        store.edit { it[currencyKey(id)] = currency.name }; Unit
+    }
 
     private fun rejectAccess(): Nothing { LogHelper.info("Security", "Rejected stale or unauthorized session"); throw AccessDeniedException() }
     private fun users(prefs: Preferences): List<Credential> {
@@ -51,6 +57,8 @@ class UserManager(private val store: DataStore<Preferences>, private val databas
     }
     private suspend fun recoverLocked() {
         var prefs = store.data.first()
+        prefs[pendingImportKey]?.let { finishImportLocked(it) }
+        prefs = store.data.first()
         prefs[pendingDeleteKey]?.let { finishDeletionLocked(it) }
         prefs = store.data.first()
         prefs[pendingRegisterKey]?.let { encoded ->
@@ -78,6 +86,59 @@ class UserManager(private val store: DataStore<Preferences>, private val databas
             val active = accounts.find { it.id == prefs[currentKey] }
             if (active == null) store.edit { it.remove(currentKey) }
             sessionState.value = active?.let { UserSession(it.id, it.username, ++generation) }
+        }
+    }
+    suspend fun exportBackup(owner: UserSession): ByteArray = withCurrentUser(owner) { id ->
+            val prefs = store.data.first()
+            val accounts = database.withTransaction {
+                users(prefs).filter { it.id == id }.map { credential ->
+                    val rows = buildList {
+                        var offset = 0
+                        do {
+                            val page = database.notes().queryByUserPaged(credential.id, 200, offset)
+                            addAll(page); offset += page.size
+                        } while (page.size == 200)
+                    }
+                    BackupAccount(credential, MoneyUnit.stored(prefs[currencyKey(credential.id)]), rows)
+                }
+            }
+            BackupDocument.encode(accounts).toByteArray(Charsets.UTF_8)
+    }
+    suspend fun importBackup(payload: ByteArray) = withContext(Dispatchers.IO) {
+        val accounts = BackupDocument.decode(payload.toString(Charsets.UTF_8))
+        mutex.withLock {
+            recoverLocked()
+            val prefs = store.data.first(); val existing = users(prefs)
+            if (accounts.any { imported -> existing.any { it.username == imported.credential.username } })
+                throw UserOperationException(UserError.BACKUP_CONFLICT)
+            var next = prefs[nextKey] ?: 1L
+            val remapped = accounts.map { account ->
+                val id = next; next = Math.addExact(next, 1)
+                account.copy(credential = account.credential.copy(id = id), notes = account.notes.map { it.copy(userId = id) })
+            }
+            // 已验证的导入计划先持久化，跨 Room / DataStore 中断可重复恢复。
+            store.edit { it[nextKey] = next; it[pendingImportKey] = BackupDocument.encode(remapped) }
+            recoverLocked()
+            LogHelper.info("Backup", "Import result=success")
+        }
+    }
+    private suspend fun finishImportLocked(encoded: String) {
+        val accounts = BackupDocument.decode(encoded)
+        database.withTransaction {
+            accounts.forEach { account ->
+                database.identities().insert(UserIdentity(account.credential.id))
+                account.notes.forEach { database.notes().insertIfAbsent(it) }
+            }
+        }
+        accounts.forEach { account ->
+            val dir = directory(account.credential.id)
+            if (!dir.isDirectory && !dir.mkdirs()) throw UserOperationException(UserError.STORAGE)
+        }
+        store.edit { prefs ->
+            val existing = users(prefs)
+            prefs[usersKey] = serialize(existing + accounts.map { it.credential }.filter { candidate -> existing.none { it.id == candidate.id } })
+            accounts.forEach { prefs[currencyKey(it.credential.id)] = it.currency.name }
+            prefs.remove(pendingImportKey)
         }
     }
     suspend fun register(username: String, password: String) = withContext(Dispatchers.IO) {
@@ -155,6 +216,7 @@ class UserManager(private val store: DataStore<Preferences>, private val databas
             prefs[usersKey] = serialize(users(prefs).filterNot { it.id == id })
             if (prefs[currentKey] == id) prefs.remove(currentKey)
             prefs.remove(pendingDeleteKey)
+            prefs.remove(currencyKey(id))
         }
     }
 }

@@ -16,14 +16,15 @@ import com.happy.consumption.data.*
 import java.util.Locale
 
 @Composable fun AmountFields(item: ConsumptionItem? = null, content: @Composable (List<String>) -> Unit) {
-    fun initial(value: Long?) = value?.let { String.format(Locale.US, "%d.%02d", it / 100, it % 100) } ?: ""
-    var breakfast by remember { mutableStateOf(initial(item?.breakfast)) }
-    var lunch by remember { mutableStateOf(initial(item?.lunch)) }
-    var dinner by remember { mutableStateOf(initial(item?.dinner)) }
-    var other by remember { mutableStateOf(initial(item?.other)) }
+    var breakfast by remember(item?.id) { mutableStateOf("") }
+    var lunch by remember(item?.id) { mutableStateOf("") }
+    var dinner by remember(item?.id) { mutableStateOf("") }
+    var other by remember(item?.id) { mutableStateOf("") }
     Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(if (item == null) R.string.blank_add_hint else R.string.blank_edit_hint))
         @Composable fun input(value: String, change: (String) -> Unit, label: Int) {
             OutlinedTextField(value, change, singleLine = true, label = { Text(stringResource(label)) },
+                prefix = { Text(LocalMoneyUnit.current.symbol) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
         }
         input(breakfast, { breakfast = it }, R.string.breakfast); input(lunch, { lunch = it }, R.string.lunch)

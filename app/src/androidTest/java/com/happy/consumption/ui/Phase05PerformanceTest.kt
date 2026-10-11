@@ -12,6 +12,12 @@ import java.io.File
 import org.json.JSONObject
 
 class Phase05PerformanceTest {
+    @org.junit.Before fun useChineseForFixedTextAssertions() {
+        runBlocking { (rule.activity.application as HappyApplication).language.select("zh") }
+        rule.waitUntil(15000) { rule.activity.resources.configuration.locales[0].language == "zh" }
+        rule.waitForIdle()
+    }
+
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
     @Test fun preserveDatasetSessionForMeasuredColdStarts() {
         val app = rule.activity.application as HappyApplication

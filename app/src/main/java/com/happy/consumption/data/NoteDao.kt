@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class NoteDao {
+    @Query("SELECT MIN(date) FROM notes WHERE userId = :userId")
+    abstract suspend fun earliestDate(userId: Long): String?
     @Query("SELECT * FROM notes WHERE userId = :userId AND date = :date LIMIT 1")
     abstract suspend fun queryByUserAndDate(userId: Long, date: String): NoteEntity?
     @Query("SELECT * FROM notes WHERE userId = :userId ORDER BY date DESC, id DESC LIMIT :limit OFFSET :offset")

@@ -18,6 +18,8 @@ fun errorMessage(error: Exception): Int = when (error) {
         UserError.STORAGE -> R.string.storage_error
         UserError.RECORD_MISSING -> R.string.record_missing
         UserError.UNCONFIRMED -> R.string.confirmation_required
+        UserError.BACKUP_INVALID -> R.string.backup_invalid
+        UserError.BACKUP_CONFLICT -> R.string.backup_conflict
     }
     else -> R.string.storage_error
 }

@@ -27,8 +27,8 @@ import com.happy.consumption.data.*
             AlertDialog(onDismissRequest = model::cancel,
                 text = { Text(stringResource(if (final) R.string.confirm_changes else R.string.continue_operation)) },
                 confirmButton = { TextButton(onClick = {
-                    if (delete) model.confirmDelete() else if (final) model.confirmModify() else model.acceptFirst()
-                }) { Text(stringResource(if (delete) R.string.confirm_delete else if (final) R.string.confirm_save else R.string.continue_button)) } },
+                    if (delete) model.confirmDelete() else if (final) model.confirmModify()
+                }) { Text(stringResource(if (delete) R.string.confirm_delete else R.string.confirm_save)) } },
                 dismissButton = { TextButton(onClick = model::cancel) { Text(stringResource(R.string.cancel)) } })
         }
     }

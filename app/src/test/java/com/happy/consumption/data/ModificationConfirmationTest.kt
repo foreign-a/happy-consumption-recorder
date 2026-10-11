@@ -1,28 +1,27 @@
 package com.happy.consumption.data
 
-// 移植自 QA ModificationConfirmationTest.java；修订规格要求手动/自动均两步确认。
+// 1.1 直接进入编辑；保存前仍须最终确认，一次性许可防止重复写入。
 import org.junit.Assert.*
 import org.junit.Test
 
 class ModificationConfirmationTest {
     private val session = UserSession(1, "A", 1)
     private fun item(manual: Boolean) = ConsumptionItem(7, 1, "2024-01-01", 10, 20, 30, 40, manual, 0)
-    @Test fun firstCancelCannotEditOrConfirm() {
+    @Test fun editingCancelCannotConfirm() {
         val c = RecordConfirmation(session); c.requestModify(item(false)); c.cancel()
         assertEquals(ConfirmationState.Idle, c.state)
-        try { c.acceptFirst(); fail() } catch (_: UserOperationException) { }
         try { c.confirmModify(); fail() } catch (_: UserOperationException) { }
     }
     @Test fun finalCancelCannotCommit() {
-        val c = RecordConfirmation(session); c.requestModify(item(false)); c.acceptFirst(); c.review(Amounts(1,2,3,4)); c.cancel()
+        val c = RecordConfirmation(session); c.requestModify(item(false));  c.review(Amounts(1,2,3,4)); c.cancel()
         try { c.confirmModify(); fail() } catch (_: UserOperationException) { }
     }
-    @Test fun bothKindsRequireTwoStepsAndSingleUsePermit() {
+    @Test fun bothKindsEditDirectlyAndRequireFinalConfirmation() {
         for (manual in listOf(false, true)) {
             val c = RecordConfirmation(session); c.requestModify(item(manual))
-            try { c.review(Amounts(1,2,3,4)); fail() } catch (_: UserOperationException) { }
+            assertTrue(c.state is ConfirmationState.Editing)
             try { c.confirmModify(); fail() } catch (_: UserOperationException) { }
-            c.acceptFirst(); c.review(Amounts(1,2,3,4)); val permit = c.confirmModify()
+             c.review(Amounts(1,2,3,4)); val permit = c.confirmModify()
             assertEquals(item(manual), permit.item); assertEquals(session, permit.session)
             permit.consume(); try { permit.consume(); fail() } catch (_: UserOperationException) { }
         }
