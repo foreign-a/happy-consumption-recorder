@@ -40,6 +40,7 @@ class UserManager(private val store: DataStore<Preferences>, private val databas
     private val pendingRegisterKey = stringPreferencesKey("pending_registration_json")
     private val pendingImportKey = stringPreferencesKey("pending_import_json")
     private fun currencyKey(id: Long) = stringPreferencesKey("currency_$id")
+    internal suspend fun defaultCurrency(id: Long) = MoneyUnit.stored(store.data.first()[currencyKey(id)])
     fun currencyFor(owner: UserSession): Flow<MoneyUnit> = store.data.map { MoneyUnit.stored(it[currencyKey(owner.id)]) }.distinctUntilChanged()
     suspend fun selectCurrency(owner: UserSession, currency: MoneyUnit) = withCurrentUser(owner) { id ->
         store.edit { it[currencyKey(id)] = currency.name }; Unit
@@ -80,6 +81,7 @@ class UserManager(private val store: DataStore<Preferences>, private val databas
             val accounts = users(prefs)
             accounts.forEach {
                 database.identities().insert(UserIdentity(it.id))
+                database.notes().fillLegacyCurrencies(it.id, MoneyUnit.stored(prefs[currencyKey(it.id)]).name)
                 val dir = directory(it.id)
                 if (!dir.isDirectory && !dir.mkdirs()) throw UserOperationException(UserError.STORAGE)
             }

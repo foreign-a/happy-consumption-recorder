@@ -30,10 +30,13 @@ class Phase04FlowTest {
         File(dir,"$name.png").outputStream().use{image.compress(Bitmap.CompressFormat.PNG,100,it)};image.recycle()
     }
     private fun language(code:String){
+        val loggedIn = rule.onAllNodesWithTag("tab_user").fetchSemanticsNodes().isNotEmpty()
+        if (loggedIn) rule.onNodeWithTag("tab_user").performClick()
         rule.onNodeWithTag("language_control").performClick()
         rule.onNodeWithTag("language_$code").performClick()
         rule.waitUntil(15000){rule.activity.resources.configuration.locales[0].language==code}
         rule.waitForIdle()
+        if (loggedIn) rule.onNodeWithTag("tab_home").performClick()
     }
     @Test fun threeLanguagesPreserveSessionPagingAndPosition() {
         runBlocking { app.language.select("zh");app.userManager.logout() }
@@ -63,12 +66,12 @@ class Phase04FlowTest {
             assertEquals(position,after,1f)
             rule.onAllNodesWithText("¥12.35").onFirst().assertExists();shot("$code-list-position")
             click(R.string.add_past_record)
-            rule.onNodeWithText(text(R.string.breakfast)).performTextReplacement("-1")
+            rule.onNode(hasText(text(R.string.breakfast)) and hasSetTextAction()).performTextReplacement("-1")
             click(R.string.save);expect(text(R.string.invalid_amount));shot("$code-amount-error")
             click(R.string.select_date);expect(text(R.string.date_confirm));shot("$code-date-picker")
             rule.onNode(hasSetTextAction() and hasAnyAncestor(hasTestTag("date_picker"))).assertTextContains(LocalDate.now().toString())
             rule.onAllNodesWithText(text(R.string.cancel)).onLast().performClick();click(R.string.cancel)
-            click(R.string.delete_user);expect(text(R.string.current_password));shot("$code-delete-password");click(R.string.cancel)
+            rule.onNodeWithTag("tab_user").performClick();click(R.string.delete_user);expect(text(R.string.current_password));shot("$code-delete-password");click(R.string.cancel);rule.onNodeWithTag("tab_home").performClick()
         }
         runBlocking {
             assertEquals(402,app.database.notes().countByUserOnce(session.id))
@@ -93,10 +96,12 @@ class Phase04FlowTest {
                 override val session: UserSession = app.userManager.session.value!!
                 override val dates=DatePolicy(java.time.Clock.systemDefaultZone())
                 override val changes=kotlinx.coroutines.flow.emptyFlow<Unit>()
-                override suspend fun snapshot(pages:Int):RecordSnapshot { if(fails)throw NullPointerException("phase04-test-only");return RecordSnapshot(emptyList(),0) }
+                override suspend fun recordDates(start: String, end: String) = snapshot(1).records.map { it.date }.filter { it >= start && it <= end }.toSet()
+        override suspend fun positionOf(date: String): Int? = snapshot(1).records.indexOfFirst { it.date == date }.takeIf { it >= 0 }
+        override suspend fun snapshot(pages:Int):RecordSnapshot { if(fails)throw NullPointerException("phase04-test-only");return RecordSnapshot(emptyList(),0) }
                 override suspend fun generatePastThirtyDays(): Int = 30
         override suspend fun ensureToday():Boolean { if(fails)throw NullPointerException("phase04-test-only");return false }
-                override suspend fun add(date:String,amounts:Amounts){fail("saved while unreadable")}
+                override suspend fun add(date: String, amounts: Amounts, currencies: EntryCurrencies?){fail("saved while unreadable")}
                 override suspend fun modify(permit:ModificationPermit){fail("modified while unreadable")}
                 override suspend fun delete(permit:DeletionPermit){fail("deleted while unreadable")}
             }
@@ -109,6 +114,8 @@ class Phase04FlowTest {
             fake.fails=false;click(R.string.retry);expect(text(R.string.empty_records));shot("$code-read-retry")
             scope.cancel()
             rule.runOnUiThread { rule.activity.setContent { com.happy.consumption.ui.theme.HappyConsumptionTheme { AppScreen(app) } } }
+            rule.waitUntil(15000) { rule.onAllNodesWithTag("tab_home").fetchSemanticsNodes().isNotEmpty() }
+            rule.onNodeWithTag("tab_home").performClick()
             expect(text(R.string.all_records))
         }
         language("ja");shot("ja-final")

@@ -7,18 +7,20 @@ import java.time.LocalDate
 internal data class BackupAccount(val credential: Credential, val currency: MoneyUnit, val notes: List<NoteEntity>)
 internal object BackupDocument {
     fun encode(accounts: List<BackupAccount>): String = JSONObject().put("format", "happy-consumption-backup")
-        .put("version", 1).put("accounts", JSONArray().apply {
+        .put("version", 2).put("accounts", JSONArray().apply {
             accounts.forEach { account -> put(account.credential.json().put("currency", account.currency.name)
                 .put("notes", JSONArray().apply { account.notes.forEach { note -> put(JSONObject()
                     .put("date", note.date).put("breakfast", note.breakfast).put("lunch", note.lunch)
                     .put("dinner", note.dinner).put("other", note.other).put("isManual", note.isManual)
-                    .put("updatedAt", note.updatedAt)) } })) }
+                    .put("updatedAt", note.updatedAt)
+                    .put("breakfastCurrency", note.breakfastCurrency ?: account.currency.name).put("lunchCurrency", note.lunchCurrency ?: account.currency.name)
+                    .put("dinnerCurrency", note.dinnerCurrency ?: account.currency.name).put("otherCurrency", note.otherCurrency ?: account.currency.name)) } })) }
         }).toString()
 
     fun decode(text: String): List<BackupAccount> {
         try {
             val root = JSONObject(text)
-            require(root.getString("format") == "happy-consumption-backup" && root.getInt("version") == 1)
+            require(root.getString("format") == "happy-consumption-backup" && root.getInt("version") in 1..2)
             val values = root.getJSONArray("accounts")
             val names = mutableSetOf<String>(); val ids = mutableSetOf<Long>()
             fun integer(json: JSONObject, field: String): Long {
@@ -35,13 +37,19 @@ internal object BackupDocument {
                 require(MoneyUnit.entries.any { it.name == code })
                 val rows = account.getJSONArray("notes"); val dates = mutableSetOf<String>()
                 val notes = List(rows.length()) { row ->
-                    val note = rows.getJSONObject(row); val date = note.getString("date")
+                    val note = rows.getJSONObject(row)
+                    fun currency(field: String): String {
+                        val value = if (root.getInt("version") == 1) code else note.getString(field)
+                        require(MoneyUnit.entries.any { it.name == value }); return value
+                    }
+                    val date = note.getString("date")
                     require(LocalDate.parse(date).toString() == date && dates.add(date))
                     val amounts = Amounts(integer(note, "breakfast"), integer(note, "lunch"), integer(note, "dinner"), integer(note, "other"))
                     amounts.validate(); val updatedAt = integer(note, "updatedAt"); require(updatedAt >= 0)
                     require(note.get("isManual") is Boolean)
                     NoteEntity(userId = credential.id, date = date, breakfast = amounts.breakfast, lunch = amounts.lunch,
-                        dinner = amounts.dinner, other = amounts.other, isManual = note.getBoolean("isManual"), updatedAt = updatedAt)
+                        dinner = amounts.dinner, other = amounts.other, isManual = note.getBoolean("isManual"), updatedAt = updatedAt, breakfastCurrency = currency("breakfastCurrency"),
+                        lunchCurrency = currency("lunchCurrency"), dinnerCurrency = currency("dinnerCurrency"), otherCurrency = currency("otherCurrency"))
                 }
                 BackupAccount(credential, MoneyUnit.stored(code), notes)
             }

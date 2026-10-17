@@ -10,4 +10,8 @@ data class ConsumptionItem(
     val other: Long,
     val isManual: Boolean,
     val updatedAt: Long,
+    val breakfastCurrency: MoneyUnit = MoneyUnit.YUAN,
+    val lunchCurrency: MoneyUnit = MoneyUnit.YUAN,
+    val dinnerCurrency: MoneyUnit = MoneyUnit.YUAN,
+    val otherCurrency: MoneyUnit = MoneyUnit.YUAN,
 )

@@ -15,20 +15,22 @@ import com.happy.consumption.R
 import com.happy.consumption.data.*
 import java.util.Locale
 
-@Composable fun AmountFields(item: ConsumptionItem? = null, content: @Composable (List<String>) -> Unit) {
+@Composable fun AmountFields(item: ConsumptionItem? = null, currencies: EntryCurrencies? = null,
+    onCurrenciesChanged: (EntryCurrencies) -> Unit = {}, content: @Composable (List<String>) -> Unit) {
     var breakfast by remember(item?.id) { mutableStateOf("") }
     var lunch by remember(item?.id) { mutableStateOf("") }
     var dinner by remember(item?.id) { mutableStateOf("") }
     var other by remember(item?.id) { mutableStateOf("") }
     Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(stringResource(if (item == null) R.string.blank_add_hint else R.string.blank_edit_hint))
-        @Composable fun input(value: String, change: (String) -> Unit, label: Int) {
+        @Composable fun input(value: String, change: (String) -> Unit, label: Int, meal: Meal) {
             OutlinedTextField(value, change, singleLine = true, label = { Text(stringResource(label)) },
-                prefix = { Text(LocalMoneyUnit.current.symbol) },
+                prefix = { Text((currencies?.get(meal) ?: LocalMoneyUnit.current).symbol) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.fillMaxWidth())
+            if (currencies != null) EntryCurrencyChoices(currencies[meal], { onCurrenciesChanged(currencies.replacing(meal, it)) }, tag = "add_currency_${meal.name}")
         }
-        input(breakfast, { breakfast = it }, R.string.breakfast); input(lunch, { lunch = it }, R.string.lunch)
-        input(dinner, { dinner = it }, R.string.dinner); input(other, { other = it }, R.string.other)
+        input(breakfast, { breakfast = it }, R.string.breakfast, Meal.BREAKFAST); input(lunch, { lunch = it }, R.string.lunch, Meal.LUNCH)
+        input(dinner, { dinner = it }, R.string.dinner, Meal.DINNER); input(other, { other = it }, R.string.other, Meal.OTHER)
         content(listOf(breakfast, lunch, dinner, other))
     }
 }
@@ -40,17 +42,19 @@ import java.util.Locale
     val busy by model.busy.collectAsState(); val message by model.message.collectAsState()
     val version by model.addedVersion.collectAsState(); val initial = remember { version }
     var values by remember { mutableStateOf(listOf("", "", "", "")) }
+    val defaultCurrency = LocalMoneyUnit.current
+    var currencies by remember { mutableStateOf(EntryCurrencies.uniform(defaultCurrency)) }
     LaunchedEffect(version) { if (version != initial) close() }
     AlertDialog(onDismissRequest = { if (!busy) close() }, title = { Text(stringResource(R.string.add_past_record)) },
         text = { Column {
             Text(stringResource(R.string.date_selected, date.toString()))
             TextButton(onClick = { choosing = true }, enabled = !busy) { Text(stringResource(R.string.select_date)) }
-            AmountFields { entered ->
+            AmountFields(currencies = currencies, onCurrenciesChanged = { currencies = it }) { entered ->
                 SideEffect { values = entered }
                 if (message != null) Text(stringResource(message!!), color = MaterialTheme.colorScheme.error)
             }
         } },
-        confirmButton = { TextButton(onClick = { model.add(date.toString(), values[0], values[1], values[2], values[3]) }, enabled = !busy) { Text(stringResource(R.string.save)) } },
+        confirmButton = { TextButton(onClick = { model.add(date.toString(), values[0], values[1], values[2], values[3], currencies) }, enabled = !busy) { Text(stringResource(R.string.save)) } },
         dismissButton = { TextButton(onClick = close, enabled = !busy) { Text(stringResource(R.string.cancel)) } })
     if (choosing) {
         val last = model.dates.utcMillis(model.dates.today())

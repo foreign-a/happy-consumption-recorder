@@ -20,11 +20,11 @@ data class Amounts(val breakfast: Long, val lunch: Long, val dinner: Long, val o
 sealed interface ConfirmationState {
     data object Idle : ConfirmationState
     data class Editing(val item: ConsumptionItem) : ConfirmationState
-    data class FinalModify(val item: ConsumptionItem, val amounts: Amounts) : ConfirmationState
+    data class FinalModify(val item: ConsumptionItem, val amounts: Amounts, val currencies: EntryCurrencies? = null) : ConfirmationState
     data class FirstDelete(val item: ConsumptionItem) : ConfirmationState
 }
 
-class ModificationPermit internal constructor(val session: UserSession, val item: ConsumptionItem, val amounts: Amounts) {
+class ModificationPermit internal constructor(val session: UserSession, val item: ConsumptionItem, val amounts: Amounts, val currencies: EntryCurrencies? = null) {
     private var consumed = false
     internal fun consume() {
         if (consumed) throw UserOperationException(UserError.UNCONFIRMED)
@@ -44,13 +44,13 @@ class RecordConfirmation(private val session: UserSession) {
     var state: ConfirmationState = ConfirmationState.Idle
         private set
     fun requestModify(item: ConsumptionItem) { check(state == ConfirmationState.Idle); state = ConfirmationState.Editing(item) }
-    fun review(amounts: Amounts) {
+    fun review(amounts: Amounts, currencies: EntryCurrencies? = null) {
         val editing = state as? ConfirmationState.Editing ?: throw UserOperationException(UserError.UNCONFIRMED)
-        amounts.validate(); state = ConfirmationState.FinalModify(editing.item, amounts)
+        amounts.validate(); state = ConfirmationState.FinalModify(editing.item, amounts, currencies)
     }
     fun confirmModify(): ModificationPermit {
         val final = state as? ConfirmationState.FinalModify ?: throw UserOperationException(UserError.UNCONFIRMED)
-        state = ConfirmationState.Idle; return ModificationPermit(session, final.item, final.amounts)
+        state = ConfirmationState.Idle; return ModificationPermit(session, final.item, final.amounts, final.currencies)
     }
     fun requestDelete(item: ConsumptionItem) { check(state == ConfirmationState.Idle); state = ConfirmationState.FirstDelete(item) }
     fun confirmDelete(): DeletionPermit {

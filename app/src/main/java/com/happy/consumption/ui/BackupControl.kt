@@ -110,7 +110,7 @@ class BackupViewModel(private val manager: UserManager, private val resolver: Co
                 if (export && password != confirmation) model.message.value = R.string.password_mismatch
                 else if (model.prepare(password, export)) {
                     close()
-                    if (export) save.launch("happy-consumption-1.1.hcrbackup") else open.launch(arrayOf("application/octet-stream", "*/*"))
+                    if (export) save.launch("happy-consumption.hcrbackup") else open.launch(arrayOf("application/octet-stream", "*/*"))
                 }
             }, enabled = !busy) { Text(stringResource(if (export) R.string.backup_export else R.string.backup_import)) } },
             dismissButton = { TextButton(onClick = ::close) { Text(stringResource(R.string.cancel)) } })

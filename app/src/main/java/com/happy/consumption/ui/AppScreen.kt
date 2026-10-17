@@ -2,9 +2,14 @@ package com.happy.consumption.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -42,7 +47,24 @@ private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider
                 onDispose { lifecycle.removeObserver(observer) }
             }
             CompositionLocalProvider(LocalMoneyUnit provides currency) {
-                AllRecordsScreen(records, current.username, auth, app.language, backup)
+                var userPage by rememberSaveable { mutableStateOf(false) }
+                val listState = rememberLazyListState()
+                val homeState = rememberSaveableStateHolder()
+                Scaffold(bottomBar = {
+                    NavigationBar {
+                        NavigationBarItem(selected = !userPage, onClick = { records.leave { userPage = false } },
+                            icon = { Icon(painterResource(R.drawable.nav_home), contentDescription = null) },
+                            label = { Text(stringResource(R.string.tab_home)) }, modifier = Modifier.testTag("tab_home"))
+                        NavigationBarItem(selected = userPage, onClick = { records.leave { userPage = true } },
+                            icon = { Icon(painterResource(R.drawable.nav_user), contentDescription = null) },
+                            label = { Text(stringResource(R.string.tab_user)) }, modifier = Modifier.testTag("tab_user"))
+                    }
+                }) { padding ->
+                    Box(Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding()).consumeWindowInsets(PaddingValues(bottom = padding.calculateBottomPadding()))) {
+                        if (userPage) UserScreen(current.username, auth, app.language, backup)
+                        else homeState.SaveableStateProvider("home") { AllRecordsScreen(records, current.username, auth, app.language, backup, listState) }
+                    }
+                }
             }
         }
     }

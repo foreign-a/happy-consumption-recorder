@@ -5,7 +5,6 @@
     <string name="modify">修改</string>
     <string name="delete">删除</string>
     <string name="add_past_record">添加过去记录</string>
-    <string name="meal_breakdown">早 %1$s · 中 %2$s · 晚 %3$s · 其他 %4$s</string>
     <string name="username">用户名</string>
     <string name="password">密码</string>
     <string name="confirm_password">确认密码</string>
@@ -73,9 +72,23 @@
     <string name="backup_conflict">备份内有同名账户，无法导入；原数据未改变</string>
     <string name="backup_short_password">备份密码至少8位</string>
     <string name="backup_io_error">无法读取或写入备份文件，请重试</string>
-    <string name="currency">币种</string>
+    <string name="currency">默认币种</string>
     <string name="currency_yuan">人民币</string>
     <string name="currency_dollar">美元</string>
     <string name="currency_pound">英镑</string>
-    <string name="currency_hint">仅改变本账户的显示单位，不换算金额。</string>
+    <string name="currency_hint">仅用于以后新增的金额，已有记录的币种保持不变。每项金额可单独选择币种。</string>
+    <string name="confirm_amount">确认</string>
+    <string name="unsaved_title">还有未确认的更改</string>
+    <string name="unsaved_message">是否确认保存当前金额和币种？</string>
+    <string name="discard_changes">放弃更改</string>
+    <string name="keep_editing">继续编辑</string>
+    <string name="tap_amount_hint">输入新金额，留空保留原值</string>
+    <string name="key_backspace">删除最后一位</string>
+    <string name="tab_home">首页</string>
+    <string name="tab_user">用户</string>
+    <string name="calendar_expand">展开月历</string>
+    <string name="calendar_collapse">收起月历</string>
+    <string name="calendar_previous">上个月</string>
+    <string name="calendar_next">下个月</string>
+    <string name="calendar_error">日期加载失败</string>
 </resources>

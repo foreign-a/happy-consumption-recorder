@@ -55,6 +55,10 @@ class UserIsolationTest {
         manager.login("A", "fixture-A")
         val a = UserRepository(manager, db, manager.session.value!!)
         assertEquals(40, a.queryRecords(1).size)
+        val own = a.queryRecords(1)
+        assertEquals(own.map { it.date }.toSet(), a.recordDates("0001-01-01", "9999-12-31"))
+        for ((index, row) in own.withIndex()) assertEquals(index, a.positionOf(row.date))
+        assertTrue(a.recordDates("1900-01-01", "1900-01-31").isEmpty()); assertNull(a.positionOf("1900-01-01"))
         denied { a.queryRecords(2) }; denied { a.queryByDate(2, "2024-01-01") }
         val bRow = db.notes().queryByUserPaged(2, 1, 0).first()
         assertEquals(0, db.notes().deleteByIdAndUser(bRow.id, 1))
@@ -63,7 +67,7 @@ class UserIsolationTest {
         // 即使传入另一用户的主键，upsert 也只能更新自己的日期记录。
         db.notes().upsert(bRow.copy(userId = 1, breakfast = 123))
         assertEquals(bRow, db.notes().queryByUserAndDate(2, bRow.date))
-        manager.logout(); denied { a.queryRecords(1) }
+        manager.logout(); denied { a.queryRecords(1) }; denied { a.recordDates("0001-01-01", "9999-12-31") }; denied { a.positionOf("2024-01-01") }
         manager.login("B", "fixture-B")
         val b = UserRepository(manager, db, manager.session.value!!)
         denied { b.queryRecords(1) }; denied { a.queryRecords(1) }

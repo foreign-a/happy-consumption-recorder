@@ -15,6 +15,12 @@ data class NoteEntity(
     val other: Long,
     val isManual: Boolean,
     val updatedAt: Long,
+    @ColumnInfo(defaultValue = "NULL") val breakfastCurrency: String? = null,
+    @ColumnInfo(defaultValue = "NULL") val lunchCurrency: String? = null,
+    @ColumnInfo(defaultValue = "NULL") val dinnerCurrency: String? = null,
+    @ColumnInfo(defaultValue = "NULL") val otherCurrency: String? = null,
 ) {
-    fun toItem() = ConsumptionItem(id, userId, date, breakfast, lunch, dinner, other, isManual, updatedAt)
+    fun toItem() = ConsumptionItem(id, userId, date, breakfast, lunch, dinner, other, isManual, updatedAt,
+        MoneyUnit.stored(breakfastCurrency), MoneyUnit.stored(lunchCurrency), MoneyUnit.stored(dinnerCurrency), MoneyUnit.stored(otherCurrency))
+    fun withCurrencies(c: EntryCurrencies) = copy(breakfastCurrency = c.breakfast.name, lunchCurrency = c.lunch.name, dinnerCurrency = c.dinner.name, otherCurrency = c.other.name)
 }

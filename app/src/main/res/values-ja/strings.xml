@@ -6,7 +6,6 @@
     <string name="modify">変更</string>
     <string name="delete">削除</string>
     <string name="add_past_record">過去の記録を追加</string>
-    <string name="meal_breakdown">朝食 %1$s · 昼食 %2$s · 夕食 %3$s · その他 %4$s</string>
     <string name="username">ユーザー名</string>
     <string name="password">パスワード</string>
     <string name="confirm_password">パスワードの確認</string>
@@ -74,9 +73,23 @@
     <string name="backup_conflict">同名のアカウントが存在するため取り込めません。既存データは維持されます</string>
     <string name="backup_short_password">バックアップ用パスワードは8文字以上必要です</string>
     <string name="backup_io_error">ファイルを読み書きできません。再試行してください</string>
-    <string name="currency">通貨</string>
+    <string name="currency">初期通貨</string>
     <string name="currency_yuan">人民元</string>
     <string name="currency_dollar">米ドル</string>
     <string name="currency_pound">英ポンド</string>
-    <string name="currency_hint">このアカウントの表示単位のみ変更します。金額は換算しません。</string>
+    <string name="currency_hint">新しい記録の初期値です。既存の通貨は変更しません。金額ごとに通貨を選択できます。</string>
+    <string name="confirm_amount">確定</string>
+    <string name="unsaved_title">未確定の変更があります</string>
+    <string name="unsaved_message">現在の金額と通貨を保存しますか？</string>
+    <string name="discard_changes">変更を破棄</string>
+    <string name="keep_editing">編集を続ける</string>
+    <string name="tap_amount_hint">新しい金額を入力。空欄は元の値を維持</string>
+    <string name="key_backspace">最後の桁を削除</string>
+    <string name="tab_home">ホーム</string>
+    <string name="tab_user">ユーザー</string>
+    <string name="calendar_expand">月表示を開く</string>
+    <string name="calendar_collapse">月表示を閉じる</string>
+    <string name="calendar_previous">前の月</string>
+    <string name="calendar_next">次の月</string>
+    <string name="calendar_error">日付を読み込めませんでした</string>
 </resources>

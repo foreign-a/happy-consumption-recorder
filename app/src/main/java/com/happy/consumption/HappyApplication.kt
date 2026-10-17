@@ -19,6 +19,6 @@ class HappyApplication : Application() {
         LogHelper.initialize(filesDir)
         startupScope.launch { language.load() }
     }
-    val database by lazy { Room.databaseBuilder(this, AppDatabase::class.java, "consumption.db").build() }
+    val database by lazy { Room.databaseBuilder(this, AppDatabase::class.java, "consumption.db").addMigrations(MIGRATION_1_2).build() }
     val userManager by lazy { UserManager(userDataStore, database, filesDir) }
 }

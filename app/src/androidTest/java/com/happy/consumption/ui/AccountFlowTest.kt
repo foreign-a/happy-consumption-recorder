@@ -24,7 +24,11 @@ class AccountFlowTest {
     private fun expect(text: String) {
         rule.waitUntil(15000) { try { rule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty() } catch (_: IllegalStateException) { false } }
     }
-    private fun click(text: String) { rule.onNodeWithText(text).performClick() }
+    private fun click(text: String) {
+        if (text in listOf("登出", "删除用户") && rule.onAllNodesWithTag("tab_user").fetchSemanticsNodes().isNotEmpty()) rule.onNodeWithTag("tab_user").performClick()
+        rule.onNodeWithText(text).performClick()
+        if (text == "取消" && rule.onAllNodesWithTag("user_page").fetchSemanticsNodes().isNotEmpty()) rule.onNodeWithTag("tab_home").performClick()
+    }
     private fun fill(label: String, value: String) {
         rule.waitUntil(10000) {
             try { rule.onAllNodesWithText(label).onLast().performTextReplacement(value); true }

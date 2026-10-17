@@ -14,11 +14,16 @@ class PagingAndFailureTest {
         override val dates=DatePolicy(Clock.fixed(Instant.parse("2026-10-10T00:00:00Z"),ZoneOffset.UTC))
         override val changes=MutableSharedFlow<Unit>(extraBufferCapacity=8)
         val notes=(0 until 405).map { i -> ConsumptionItem(i.toLong()+1,1,LocalDate.of(2025,1,1).plusDays(i.toLong()).toString(),0,0,0,0,false,0) }.reversed().toMutableList()
-        var fail=false;var writes=0
+        var fail=false;var writes=0;var calendarFails=false
         override suspend fun generatePastThirtyDays(): Int = 30
         override suspend fun ensureToday():Boolean { if(fail) throw IOException("read failed");return false }
+        override suspend fun recordDates(start: String, end: String): Set<String> {
+            if (calendarFails) throw IOException("synthetic calendar failure")
+            return notes.map { it.date }.filter { it >= start && it <= end }.toSet()
+        }
+        override suspend fun positionOf(date: String): Int? = notes.indexOfFirst { it.date == date }.takeIf { it >= 0 }
         override suspend fun snapshot(pages:Int):RecordSnapshot { if(fail)throw IOException("read failed");return RecordSnapshot(notes.take(pages*200),notes.size) }
-        override suspend fun add(date:String,amounts:Amounts){writes++}
+        override suspend fun add(date: String, amounts: Amounts, currencies: EntryCurrencies?){writes++}
         override suspend fun modify(permit:ModificationPermit){permit.consume();writes++}
         override suspend fun delete(permit:DeletionPermit){permit.consume();notes.removeIf{it.id==permit.item.id};writes++}
     }
@@ -53,6 +58,51 @@ class PagingAndFailureTest {
             vm.requestModify(item);vm.review("1","2","3","4");vm.confirmModify();assertEquals(1,repo.writes)
             vm.requestDelete(item);vm.cancel();assertEquals(1,repo.writes)
             vm.requestDelete(item);vm.confirmDelete();assertEquals(2,repo.writes);assertEquals(404,vm.state.value.count)
+        } finally { scope.cancel() }
+    }
+
+    @Test fun calendarFindsUnloadedDateWithoutWritingAndMissingDateDoesNothing() {
+        val scope=CoroutineScope(SupervisorJob()+Dispatchers.Unconfined)
+        try {
+            val repo=Fake();val vm=AllRecordsViewModel(repo,scope)
+            vm.showCalendar("2025-01-01","2025-01-31")
+            assertEquals(31,vm.calendar.value.available.size)
+            val old=repo.notes.last();vm.jumpToDate(old.date)
+            assertEquals(405,vm.state.value.records.size);assertEquals(old.id,vm.dateJump.value!!.id)
+            assertEquals(old.date,vm.selectedDate.value);assertEquals(0,repo.writes)
+            vm.dateJump.value=null;vm.jumpToDate("2020-01-01")
+            assertNull(vm.dateJump.value);assertEquals(old.date,vm.selectedDate.value);assertEquals(0,repo.writes)
+        } finally { scope.cancel() }
+    }
+    @Test fun calendarJumpWaitsForDraftDecisionAndCanBeCancelled() {
+        val scope=CoroutineScope(SupervisorJob()+Dispatchers.Unconfined)
+        try {
+            val repo=Fake();val vm=AllRecordsViewModel(repo,scope);val old=repo.notes.last()
+            vm.editAmount(repo.notes.first(),Meal.BREAKFAST);vm.pressKey("9");vm.jumpToDate(old.date)
+            assertTrue(vm.leavePrompt.value);assertNull(vm.dateJump.value)
+            vm.keepEditing();assertNull(vm.dateJump.value);assertNotNull(vm.inline.value)
+            vm.jumpToDate(old.date);vm.discardInline()
+            assertEquals(old.id,vm.dateJump.value!!.id);assertEquals(0,repo.writes)
+        } finally { scope.cancel() }
+    }
+
+    @Test fun calendarFailureShowsErrorAndRetryDoesNotMarkRecordsUnreadable() {
+        val scope=CoroutineScope(SupervisorJob()+Dispatchers.Unconfined)
+        try {
+            val repo=Fake();val vm=AllRecordsViewModel(repo,scope)
+            repo.calendarFails=true;vm.showCalendar("2025-01-01","2025-01-31")
+            assertTrue(vm.calendar.value.error);assertFalse(vm.calendar.value.loading);assertFalse(vm.state.value.error)
+            repo.calendarFails=false;vm.refreshCalendar()
+            assertFalse(vm.calendar.value.error);assertEquals(31,vm.calendar.value.available.size);assertEquals(0,repo.writes)
+        } finally { scope.cancel() }
+    }
+    @Test fun failedPageLoadDoesNotSelectOrJumpToStaleRecord() {
+        val scope=CoroutineScope(SupervisorJob()+Dispatchers.Unconfined)
+        try {
+            val repo=Fake();val vm=AllRecordsViewModel(repo,scope)
+            val selected=vm.selectedDate.value;repo.fail=true;vm.jumpToDate(repo.notes.first().date)
+            assertTrue(vm.state.value.error);assertNull(vm.dateJump.value);assertEquals(selected,vm.selectedDate.value)
+            assertFalse(vm.jumping.value);assertEquals(0,repo.writes)
         } finally { scope.cancel() }
     }
 }
