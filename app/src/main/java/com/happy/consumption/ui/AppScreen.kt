@@ -6,6 +6,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -36,10 +37,11 @@ private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider
         val current = session!!
         key(current.generation) {
             val currency by remember(current) { app.userManager.currencyFor(current) }.collectAsState(initial = com.happy.consumption.data.MoneyUnit.YUAN)
+            val schedule = remember(current) { com.happy.consumption.data.PersonalSchedule(app, current.id) }
             val store = remember(current) { auth.recordsStoreFor(current) }
             val owner = remember { object : ViewModelStoreOwner { override val viewModelStore = store } }
             val records: AllRecordsViewModel = viewModel(viewModelStoreOwner = owner,
-                factory = remember { factory { AllRecordsViewModel(UserRepository(app.userManager, app.database, current)) } })
+                factory = remember { factory { AllRecordsViewModel(UserRepository(app.userManager, app.database, current, schedule.clock())) } })
             val lifecycle = LocalLifecycleOwner.current.lifecycle
             DisposableEffect(lifecycle, records) {
                 val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_START) records.refreshToday() }
@@ -50,19 +52,19 @@ private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider
                 var userPage by rememberSaveable { mutableStateOf(false) }
                 val listState = rememberLazyListState()
                 val homeState = rememberSaveableStateHolder()
-                Scaffold(bottomBar = {
-                    NavigationBar {
-                        NavigationBarItem(selected = !userPage, onClick = { records.leave { userPage = false } },
-                            icon = { Icon(painterResource(R.drawable.nav_home), contentDescription = null) },
-                            label = { Text(stringResource(R.string.tab_home)) }, modifier = Modifier.testTag("tab_home"))
-                        NavigationBarItem(selected = userPage, onClick = { records.leave { userPage = true } },
-                            icon = { Icon(painterResource(R.drawable.nav_user), contentDescription = null) },
-                            label = { Text(stringResource(R.string.tab_user)) }, modifier = Modifier.testTag("tab_user"))
+                Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(if (userPage) R.string.tab_user else R.string.app_name),
+                            style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                        IconButton(onClick = { records.leave { userPage = !userPage } },
+                            modifier = Modifier.testTag(if (userPage) "tab_home" else "tab_user")) {
+                            Icon(painterResource(if (userPage) R.drawable.nav_home else R.drawable.nav_user),
+                                contentDescription = stringResource(if (userPage) R.string.tab_home else R.string.tab_user))
+                        }
                     }
-                }) { padding ->
-                    Box(Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding()).consumeWindowInsets(PaddingValues(bottom = padding.calculateBottomPadding()))) {
-                        if (userPage) UserScreen(current.username, auth, app.language, backup)
-                        else homeState.SaveableStateProvider("home") { AllRecordsScreen(records, current.username, auth, app.language, backup, listState) }
+                    Box(Modifier.weight(1f)) {
+                        if (userPage) UserScreen(current.username, auth, app.language, backup, schedule, records)
+                        else homeState.SaveableStateProvider("home") { AllRecordsScreen(records, current.username, auth, app.language, backup, listState, schedule) }
                     }
                 }
             }

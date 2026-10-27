@@ -15,6 +15,14 @@ interface RecordsRepository {
     suspend fun recordDates(start: String, end: String): Set<String>
     suspend fun positionOf(date: String): Int?
     suspend fun snapshot(pages: Int): RecordSnapshot
+    suspend fun range(start: String, end: String): List<ConsumptionItem> {
+        var page = 1
+        var result = snapshot(page)
+        while (result.records.size < result.count) { result = snapshot(++page) }
+        return result.records.filter { it.date in start..end }
+    }
+    suspend fun ensurePastDate(date: String): Boolean = throw UnsupportedOperationException()
+    suspend fun deleteBatch(permit: BatchDeletionPermit): Int = throw UnsupportedOperationException()
     suspend fun ensureToday(): Boolean
     suspend fun generatePastThirtyDays(): Int
     suspend fun add(date: String, amounts: Amounts, currencies: EntryCurrencies? = null)
@@ -40,6 +48,32 @@ class UserRepository(private val manager: UserManager, private val database: App
         LogHelper.info("AutoRecord", "userId=${owner.id} date=$date result=${if (generated) "generated" else "skipped"} reason=${if (generated) "missing" else "existing_or_concurrent"}")
         return generated
     }
+    override suspend fun ensurePastDate(date: String): Boolean = manager.withCurrentUser(owner) { id ->
+        if (dates.parseManual(date) >= dates.today()) throw UserOperationException(UserError.INVALID_DATE)
+        val note = NoteEntity(userId = id, date = date, breakfast = 0, lunch = 0, dinner = 0,
+            other = 0, isManual = false, updatedAt = clock.millis())
+            .withCurrencies(EntryCurrencies.uniform(manager.defaultCurrency(id)))
+        (database.notes().insertIfAbsent(note) != -1L).also {
+            LogHelper.info("Calendar", "Create past date userId=$id date=$date inserted=$it")
+        }
+    }
+    override suspend fun deleteBatch(permit: BatchDeletionPermit): Int = manager.withCurrentUser(owner) { id ->
+        if (permit.session != owner || permit.items.any { it.userId != id }) throw AccessDeniedException()
+        permit.validate(dates)
+        permit.consume()
+        database.withTransaction {
+            // Validate every identity before deleting anything; replacements must never be removed.
+            for (item in permit.items) {
+                if (database.notes().queryByUserAndDate(id, item.date)?.id != item.id)
+                    throw UserOperationException(UserError.RECORD_MISSING)
+            }
+            for (item in permit.items) {
+                if (database.notes().deleteByIdAndUser(item.id, id) != 1)
+                    throw UserOperationException(UserError.RECORD_MISSING)
+            }
+            permit.items.size
+        }.also { LogHelper.info("Record", "Batch delete userId=$id count=$it result=success") }
+    }
     suspend fun shouldGenerate(userId: Long, today: String) = generator.shouldGenerate(userId, today)
     override suspend fun generatePastThirtyDays(): Int = manager.withCurrentUser(owner) { id ->
         database.withTransaction {
@@ -60,6 +94,9 @@ class UserRepository(private val manager: UserManager, private val database: App
         database.notes().queryByUserAndDate(it, date).also {
             if (date.matches(Regex("""\d{4}-\d{2}-\d{2}"""))) LogHelper.info("Query", "查询了${date}的数据 userId=$userId result=success")
         }
+    }
+    override suspend fun range(start: String, end: String): List<ConsumptionItem> = manager.withCurrentUser(owner) { id ->
+        database.notes().recordsInRange(id, start, end).map { it.toItem() }
     }
     override suspend fun recordDates(start: String, end: String): Set<String> = manager.withCurrentUser(owner) { id ->
         database.notes().datesInRange(id, start, end).toSet()

@@ -17,11 +17,12 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 
-/** Rolling seven days, or a Monday-first month. Missing dates never create records. */
+/** Rolling seven days, or a Monday-first month. Missing past dates create zero records on selection. */
 @Composable fun DateCalendar(model: AllRecordsViewModel, editing: Boolean, regions: MutableMap<String, Rect>) {
     val calendar by model.calendar.collectAsState()
     val selected by model.selectedDate.collectAsState()
     val jumping by model.jumping.collectAsState()
+    val busy by model.busy.collectAsState()
     val today = model.dates.today()
     var expanded by rememberSaveable { mutableStateOf(false) }
     var monthText by rememberSaveable { mutableStateOf(YearMonth.from(today).toString()) }
@@ -74,13 +75,14 @@ import java.time.format.TextStyle
                     if (date == null) Spacer(Modifier.height(48.dp)) else {
                         val exists = date.toString() in calendar.available && date <= today
                         val tag = "calendar_date_$date"
-                        TextButton(onClick = { model.jumpToDate(date.toString()) }, enabled = exists && !calendar.loading && !jumping,
+                        TextButton(onClick = { model.openCalendarDate(date.toString()) }, enabled = date <= today && !calendar.loading && !jumping && !busy,
                             colors = ButtonDefaults.textButtonColors(
+                                contentColor = if (exists) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                 containerColor = if (selected == date.toString() && exists) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
                                 disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)),
                             contentPadding = PaddingValues(0.dp), modifier = Modifier.fillMaxWidth().height(48.dp).testTag(tag)
                                 .semantics { contentDescription = date.toString(); this.selected = selected == date.toString() && exists }
-                                .then(if (exists) editTouchRegion(regions, tag) else Modifier)) { Text(date.dayOfMonth.toString()) }
+                                .then(if (date <= today) editTouchRegion(regions, tag) else Modifier)) { Text(date.dayOfMonth.toString()) }
                     }
                 }
             }

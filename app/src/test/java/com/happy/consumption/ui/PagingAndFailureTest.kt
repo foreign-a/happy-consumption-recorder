@@ -68,7 +68,7 @@ class PagingAndFailureTest {
             vm.showCalendar("2025-01-01","2025-01-31")
             assertEquals(31,vm.calendar.value.available.size)
             val old=repo.notes.last();vm.jumpToDate(old.date)
-            assertEquals(405,vm.state.value.records.size);assertEquals(old.id,vm.dateJump.value!!.id)
+            assertEquals(200,vm.state.value.records.size);assertEquals(old,vm.selectedRecord.value);assertEquals(old.id,vm.dateJump.value!!.id)
             assertEquals(old.date,vm.selectedDate.value);assertEquals(0,repo.writes)
             vm.dateJump.value=null;vm.jumpToDate("2020-01-01")
             assertNull(vm.dateJump.value);assertEquals(old.date,vm.selectedDate.value);assertEquals(0,repo.writes)
@@ -103,6 +103,32 @@ class PagingAndFailureTest {
             val selected=vm.selectedDate.value;repo.fail=true;vm.jumpToDate(repo.notes.first().date)
             assertTrue(vm.state.value.error);assertNull(vm.dateJump.value);assertEquals(selected,vm.selectedDate.value)
             assertFalse(vm.jumping.value);assertEquals(0,repo.writes)
+        } finally { scope.cancel() }
+    }
+
+    @Test fun monthlyRangeContainsOnlyRequestedMonthAndRefreshesAfterWrites() {
+        val scope=CoroutineScope(SupervisorJob()+Dispatchers.Unconfined)
+        try {
+            val repo=Fake();val vm=AllRecordsViewModel(repo,scope)
+            vm.loadMonth(YearMonth.of(2025,1))
+            assertEquals(31,vm.monthRecords.value.size)
+            assertTrue(vm.monthRecords.value.all { it.date.startsWith("2025-01-") })
+            assertFalse(vm.monthLoading.value);assertFalse(vm.monthError.value)
+            val row=vm.monthRecords.value.first()
+            vm.requestDelete(row);vm.confirmDelete()
+            assertEquals(30,vm.monthRecords.value.size)
+            assertFalse(vm.monthRecords.value.any { it.id==row.id })
+        } finally { scope.cancel() }
+    }
+    @Test fun monthlyFailureIsIndependentAndRetryRecovers() {
+        val scope=CoroutineScope(SupervisorJob()+Dispatchers.Unconfined)
+        try {
+            val repo=Fake();val vm=AllRecordsViewModel(repo,scope)
+            repo.fail=true;vm.loadMonth(YearMonth.of(2025,1))
+            assertTrue(vm.monthError.value);assertFalse(vm.monthLoading.value)
+            assertFalse(vm.state.value.error)
+            repo.fail=false;vm.loadMonth(YearMonth.of(2025,2))
+            assertFalse(vm.monthError.value);assertEquals(28,vm.monthRecords.value.size)
         } finally { scope.cancel() }
     }
 }

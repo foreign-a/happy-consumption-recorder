@@ -5,6 +5,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class NoteDao {
+    @Query("SELECT * FROM notes WHERE userId=:userId AND date BETWEEN :start AND :end ORDER BY date")
+    abstract suspend fun recordsInRange(userId: Long, start: String, end: String): List<NoteEntity>
+
     @Query("SELECT date FROM notes WHERE userId=:userId AND date BETWEEN :start AND :end ORDER BY date")
     abstract suspend fun datesInRange(userId: Long, start: String, end: String): List<String>
     @Query("SELECT COUNT(*) FROM notes WHERE userId=:userId AND date>:date")

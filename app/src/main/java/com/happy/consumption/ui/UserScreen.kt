@@ -12,18 +12,22 @@ import androidx.compose.ui.unit.dp
 import com.happy.consumption.R
 import com.happy.consumption.data.*
 
-@Composable fun UserScreen(username: String, auth: AppViewModel, language: LanguageSettings?, backup: BackupViewModel?) {
+@Composable fun UserScreen(username: String, auth: AppViewModel, language: LanguageSettings?, backup: BackupViewModel?, schedule: PersonalSchedule? = null, records: AllRecordsViewModel? = null) {
     var deletingUser by remember { mutableStateOf(false) }
     var deletionPassword by remember { mutableStateOf("") }
     var deletionSession by remember { mutableStateOf<UserSession?>(null) }
     val authBusy by auth.busy.collectAsState()
     val authMessage by auth.message.collectAsState()
 
-    Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(24.dp).testTag("user_page"),
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 12.dp).testTag("user_page"),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(stringResource(R.string.tab_user), style = MaterialTheme.typography.headlineLarge)
         Text(stringResource(R.string.current_user, username), style = MaterialTheme.typography.titleMedium)
         HorizontalDivider()
+        if (schedule != null && records != null) {
+            ScheduleControl(schedule) { records.refreshToday() }
+            MonthlyStatistics(records, schedule)
+            HorizontalDivider()
+        }
         if (backup != null) BackupControl(backup, loggedIn = true)
         if (language != null) LanguageControl(language)
         CurrencyControl(auth)

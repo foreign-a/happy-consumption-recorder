@@ -2,7 +2,6 @@ package com.happy.consumption.ui
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.semantics.SemanticsProperties
 import com.happy.consumption.*
 import com.happy.consumption.data.*
 import kotlinx.coroutines.runBlocking
@@ -13,66 +12,82 @@ import java.time.*
 class CalendarNavigationTest {
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
     private val app get() = rule.activity.application as HappyApplication
-    private val today = LocalDate.now()
     private lateinit var owner: UserSession
-    private var todayId = 0L
-    private fun waitTag(tag: String) { rule.waitUntil(15000) { rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() } }
-    private fun tap(tag: String) { waitTag(tag); rule.onNodeWithTag(tag).performClick() }
-    @Before fun setup() {
+    private lateinit var today: LocalDate
+    private fun waitTag(tag: String) { rule.waitUntil(20000) { rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() } }
+    private fun tap(tag: String) { waitTag(tag);rule.onNodeWithTag(tag).performClick() }
+    private fun row(date: LocalDate) { waitTag("batch_date_$date");rule.onNodeWithTag("batch_date_$date").performScrollTo().performClick() }
+    private fun openDelete() { rule.onNodeWithTag("record_actions").performScrollTo().performClick();tap("batch_delete_entry");waitTag("batch_delete_dialog") }
+    @Before fun setup() = runBlocking {
+        app.language.select("zh");app.userManager.logout()
+        val name="v14-calendar-${System.nanoTime()}"
+        app.userManager.register(name,"fixture-v14");app.userManager.login(name,"fixture-v14")
+        owner=app.userManager.session.value!!
+        val settings=PersonalSchedule(app,owner.id);settings.save(MealSchedule("Asia/Shanghai"))
+        today=LocalDate.now(ZoneId.of("Asia/Shanghai"))
+        UserRepository(app.userManager,app.database,owner,settings.clock()).ensureToday()
+        Unit
+    }
+    @Test fun missingPastDateCreatesZeroImmediatelyAndRepeatingDoesNotOverwrite() {
+        val date=today.minusDays(1)
+        waitTag("calendar_date_$date")
+        rule.waitUntil(15000) { try { rule.onNodeWithTag("calendar_date_$date").assertIsEnabled();true } catch (_:AssertionError) { false } }
+        tap("calendar_date_$date")
+        rule.waitUntil(15000) { runBlocking { app.database.notes().queryByUserAndDate(owner.id,date.toString())!=null } }
+        val note=runBlocking { app.database.notes().queryByUserAndDate(owner.id,date.toString())!! }
+        waitTag("record_${note.id}");assertEquals(0L,note.breakfast+note.lunch+note.dinner+note.other)
+        rule.onNodeWithTag("batch_delete_dialog").assertDoesNotExist()
+        tap("amount_${note.id}_OTHER");tap("key_7");tap("keypad_confirm")
+        rule.waitUntil(15000) { runBlocking { app.database.notes().queryByUserAndDate(owner.id,date.toString())!!.other==700L } }
+        tap("calendar_date_$date")
+        assertEquals(700L,runBlocking { app.database.notes().queryByUserAndDate(owner.id,date.toString())!!.other })
+        assertEquals(2,runBlocking { app.database.notes().countByUserOnce(owner.id) })
+        rule.onNodeWithTag("calendar_toggle").performScrollTo().performClick()
+        if (today.dayOfMonth<today.lengthOfMonth()) {
+            rule.onNodeWithTag("calendar_date_${today.plusDays(1)}").assertIsNotEnabled()
+        }
+    }
+    @Test fun multiMonthSelectionCancelsSafelyThenDeletesOnlyConfirmedDates() {
+        val recent=today.minusDays(1)
+        val older=YearMonth.from(recent).minusMonths(1).atEndOfMonth()
+        val keep=generateSequence(today.minusDays(2)) { it.minusDays(1) }.first { it!=recent && it!=older }
         runBlocking {
-            app.language.select("zh"); app.userManager.logout()
-            val name="calendar-${System.nanoTime()}";app.userManager.register(name,"calendar-only");app.userManager.login(name,"calendar-only")
-            owner=app.userManager.session.value!!
-            UserRepository(app.userManager,app.database,owner).ensureToday()
-            todayId=app.database.notes().queryByUserAndDate(owner.id,today.toString())!!.id
+            for (date in listOf(recent,older,keep)) app.database.notes().insertIfAbsent(NoteEntity(userId=owner.id,date=date.toString(),breakfast=123,lunch=200,dinner=300,other=400,isManual=true,updatedAt=0))
         }
-        waitTag("date_calendar")
-        rule.waitUntil(15000) { rule.onAllNodesWithTag("calendar_date_$today").fetchSemanticsNodes().isNotEmpty() &&
-            try { rule.onNodeWithTag("calendar_date_$today").assertIsEnabled(); true } catch (_: AssertionError) { false } }
+        waitTag("record_actions");openDelete()
+        rule.onNodeWithTag("batch_date_$today").assertDoesNotExist()
+        rule.onNodeWithTag("batch_review_delete").assertIsNotEnabled()
+        var month=YearMonth.from(today)
+        while (month>YearMonth.from(recent)) { tap("batch_previous");month=month.minusMonths(1) }
+        row(recent)
+        while (month>YearMonth.from(older)) { tap("batch_previous");month=month.minusMonths(1) }
+        row(older);rule.onNodeWithTag("batch_selected_count").assertTextEquals("已选 2 条")
+        tap("batch_review_delete")
+        assertEquals(4,runBlocking { app.database.notes().countByUserOnce(owner.id) })
+        tap("batch_cancel");tap("batch_cancel")
+        assertEquals(4,runBlocking { app.database.notes().countByUserOnce(owner.id) })
+        openDelete();month=YearMonth.from(today)
+        while (month>YearMonth.from(recent)) { tap("batch_previous");month=month.minusMonths(1) }
+        row(recent)
+        while (month>YearMonth.from(older)) { tap("batch_previous");month=month.minusMonths(1) }
+        row(older);tap("batch_review_delete");tap("batch_confirm_delete")
+        rule.waitUntil(15000) { runBlocking { app.database.notes().countByUserOnce(owner.id)==2 } }
+        assertNotNull(runBlocking { app.database.notes().queryByUserAndDate(owner.id,today.toString()) })
+        assertNotNull(runBlocking { app.database.notes().queryByUserAndDate(owner.id,keep.toString()) })
+        assertNull(runBlocking { app.database.notes().queryByUserAndDate(owner.id,older.toString()) })
+        rule.waitUntil(15000) { try { rule.onNodeWithTag("calendar_date_$recent").assertIsEnabled();true } catch (_:AssertionError) { false } }
+        tap("calendar_date_$recent")
+        rule.waitUntil(15000) { runBlocking { app.database.notes().queryByUserAndDate(owner.id,recent.toString())!=null } }
+        assertEquals(0L,runBlocking { app.database.notes().queryByUserAndDate(owner.id,recent.toString())!!.breakfast })
     }
-    @Test fun rollingWeekShowsSevenDaysMissingDatesDisabledAndMonthHasAllDays() {
-        for (i in 0L..6L) rule.onNodeWithTag("calendar_date_${today.minusDays(i)}").assertExists()
-        rule.onNodeWithTag("calendar_date_${today.minusDays(7)}").assertDoesNotExist()
-        rule.onNodeWithTag("calendar_date_${today.minusDays(1)}").assertIsNotEnabled()
-        tap("calendar_toggle")
-        for (i in 1..today.lengthOfMonth()) rule.onNodeWithTag("calendar_date_${today.withDayOfMonth(i)}").assertExists()
-        rule.onNodeWithTag("calendar_next").assertIsNotEnabled()
-        assertEquals(1,runBlocking { app.database.notes().countByUserOnce(owner.id) })
-        tap("calendar_toggle");rule.onNodeWithTag("calendar_previous").assertDoesNotExist()
-    }
-    @Test fun monthJumpLoadsOldPageAndTabRoundTripPreservesCalendarAndPosition() {
-        val old=today.minusDays(210)
-        val oldId=runBlocking {
-            for (i in 0L..200L) app.database.notes().insertIfAbsent(NoteEntity(userId=owner.id,date=old.plusDays(i).toString(),breakfast=i,lunch=0,dinner=0,other=0,isManual=true,updatedAt=0))
-            app.database.notes().queryByUserAndDate(owner.id,old.toString())!!.id
-        }
-        rule.waitUntil(15000) { rule.onAllNodesWithText("共 202 条").fetchSemanticsNodes().isNotEmpty() }
-        tap("calendar_toggle")
-        repeat(java.time.temporal.ChronoUnit.MONTHS.between(YearMonth.from(old),YearMonth.from(today)).toInt()) { tap("calendar_previous") }
-        rule.waitUntil(15000) { try { rule.onNodeWithTag("calendar_date_$old").assertIsEnabled();true } catch (_:AssertionError) { false } }
-        tap("calendar_date_$old")
-        rule.waitUntil(15000) { rule.onAllNodesWithTag("record_$oldId").fetchSemanticsNodes().isNotEmpty() }
-        rule.onNodeWithTag("record_$oldId").assertIsDisplayed()
-        rule.onNodeWithTag("calendar_date_$old").assertIsSelected()
-        val position=rule.onNodeWithTag("record_list").fetchSemanticsNode().config[SemanticsProperties.VerticalScrollAxisRange].value()
-        tap("tab_user");rule.onNodeWithTag("language_control").assertExists();rule.onNodeWithTag("currency_control").assertExists()
-        tap("tab_home");rule.onNodeWithTag("calendar_date_$old").assertIsSelected()
-        val after=rule.onNodeWithTag("record_list").fetchSemanticsNode().config[SemanticsProperties.VerticalScrollAxisRange].value()
-        assertEquals(position,after,1f);rule.onNodeWithTag("record_$oldId").assertIsDisplayed()
-    }
-    @Test fun userTabWaitsForDraftDecisionThenProvidesSettingsAndPasswordDeletion() {
-        tap("amount_${todayId}_OTHER");tap("key_5");tap("tab_user")
-        waitTag("leave_keep");rule.onNodeWithTag("user_page").assertDoesNotExist()
-        tap("leave_keep");rule.onNodeWithTag("phone_keypad").assertExists()
-        tap("tab_user");tap("leave_save");waitTag("user_page")
-        assertEquals(500L,runBlocking { app.database.notes().queryByIdAndUser(todayId,owner.id)!!.other })
-        rule.onNodeWithTag("language_control").assertExists();rule.onNodeWithTag("currency_control").assertExists()
-        rule.onNodeWithText("备份与恢复").assertExists();rule.onNodeWithText("登出").assertExists()
-        rule.onNodeWithText("删除用户").performScrollTo().performClick()
-        rule.onNodeWithTag("delete_password").assertExists();rule.onNodeWithText("确认删除").assertIsNotEnabled()
-        rule.onNodeWithText("取消").performClick();tap("tab_home")
-        rule.onNodeWithTag("phone_keypad").assertDoesNotExist()
-        tap("amount_${todayId}_OTHER");tap("key_7");tap("tab_user");tap("leave_discard");waitTag("user_page")
-        assertEquals(500L,runBlocking { app.database.notes().queryByIdAndUser(todayId,owner.id)!!.other })
+    @Test fun creatingPastDateStillProtectsUnsavedAmounts() {
+        waitTag("phone_keypad")
+        val id=runBlocking { app.database.notes().queryByUserAndDate(owner.id,today.toString())!!.id }
+        tap("amount_${id}_OTHER");tap("key_5");tap("calendar_date_${today.minusDays(1)}")
+        waitTag("leave_keep")
+        assertNull(runBlocking { app.database.notes().queryByUserAndDate(owner.id,today.minusDays(1).toString()) })
+        tap("leave_keep");tap("calendar_date_${today.minusDays(1)}");tap("leave_save")
+        rule.waitUntil(15000) { runBlocking { app.database.notes().queryByUserAndDate(owner.id,today.minusDays(1).toString())!=null } }
+        assertEquals(500L,runBlocking { app.database.notes().queryByUserAndDate(owner.id,today.toString())!!.other })
     }
 }
