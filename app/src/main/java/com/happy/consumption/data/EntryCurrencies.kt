@@ -19,9 +19,10 @@ fun ConsumptionItem.totals(): String = Meal.entries.groupBy { currencies[it] }.e
     .joinToString(" + ") { (unit, meals) -> unit.format(meals.sumOf { value(it) }) }
 
 data class InlineDraft(val item: ConsumptionItem, val selected: Meal,
-    val inputs: List<String> = List(4) { "" }, val currencies: EntryCurrencies = item.currencies) {
+    val inputs: List<String> = List(4) { "" }, val currencies: EntryCurrencies = item.currencies, val operation: DraftOperation = DraftOperation.REPLACE) {
     val changed: Boolean get() = currencies != item.currencies || Meal.entries.any { meal ->
-        inputs[meal.ordinal].isNotBlank() && AmountInput.previewCents(inputs[meal.ordinal]) != item.value(meal)
+        inputs[meal.ordinal].isNotBlank() && AmountInput.previewCents(inputs[meal.ordinal]) !=
+            (if (operation == DraftOperation.REPLACE) item.value(meal) else 0L)
     }
     fun press(key: String): InlineDraft {
         val previous = inputs[selected.ordinal]
@@ -32,8 +33,24 @@ data class InlineDraft(val item: ConsumptionItem, val selected: Meal,
         }
         return copy(inputs = inputs.toMutableList().apply { this[selected.ordinal] = next })
     }
-    fun amounts() = Amounts.editing(item, inputs[0], inputs[1], inputs[2], inputs[3])
+    fun amounts(): Amounts {
+        val values = Meal.entries.map { meal ->
+            val input = inputs[meal.ordinal]
+            if (input.isBlank()) item.value(meal) else {
+                val entered = AmountInput.cents(input)
+                when (operation) {
+                    DraftOperation.REPLACE -> entered
+                    DraftOperation.ADD -> item.value(meal) + entered
+                    DraftOperation.SUBTRACT -> item.value(meal) - entered
+                }
+            }
+        }
+        if (operation != DraftOperation.REPLACE && values.any { it !in 0L..999999L })
+            throw UserOperationException(UserError.INVALID_ADJUSTMENT)
+        return Amounts(values[0], values[1], values[2], values[3]).also { it.validate() }
+    }
     fun preview(meal: Meal) = currencies[meal].let { unit ->
-        if (inputs[meal.ordinal].isBlank()) unit.format(item.value(meal)) else unit.symbol + inputs[meal.ordinal]
+        if (inputs[meal.ordinal].isBlank()) unit.format(item.value(meal)) else
+            (when (operation) { DraftOperation.ADD -> "+"; DraftOperation.SUBTRACT -> "−"; else -> "" }) + unit.symbol + inputs[meal.ordinal]
     }
 }

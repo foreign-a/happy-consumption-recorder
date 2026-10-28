@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -12,6 +13,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.happy.consumption.R
 import com.happy.consumption.data.*
+
+fun operationLabel(operation: DraftOperation) = when (operation) {
+    DraftOperation.REPLACE -> R.string.entry_replace
+    DraftOperation.ADD -> R.string.operation_add
+    DraftOperation.SUBTRACT -> R.string.operation_subtract
+}
 
 fun mealLabel(meal: Meal) = when (meal) {
     Meal.BREAKFAST -> R.string.breakfast
@@ -31,14 +38,15 @@ fun mealLabel(meal: Meal) = when (meal) {
 @Composable fun PhoneKeypad(model: AllRecordsViewModel, draft: InlineDraft?, modifier: Modifier = Modifier) {
     val busy by model.busy.collectAsState()
     val unavailable = busy || draft == null
+    val operation by model.operation.collectAsState()
     val deleteLabel = stringResource(R.string.key_backspace)
-    Surface(modifier, tonalElevation = 6.dp, shadowElevation = 8.dp) {
+    Surface(modifier.modeBackground(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)), color = Color.Transparent, shadowElevation = 8.dp) {
         BoxWithConstraints(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 4.dp).testTag("phone_keypad")) {
             @Composable fun controls() {
-                Text(stringResource(mealLabel((draft?.selected ?: Meal.OTHER))) + " " + (draft?.preview(draft.selected) ?: "—"), style = MaterialTheme.typography.titleMedium)
-                Text(stringResource(R.string.tap_amount_hint), style = MaterialTheme.typography.bodySmall)
-                EntryCurrencyChoices((draft?.currencies?.get(draft.selected) ?: LocalMoneyUnit.current), model::changeEntryCurrency, !unavailable)
-                Button(onClick = model::saveInline, enabled = !unavailable, modifier = Modifier.testTag("keypad_confirm")) { Text(stringResource(R.string.confirm_amount)) }
+                Text(stringResource(operationLabel(operation)) + " · " + stringResource(mealLabel((draft?.selected ?: Meal.OTHER))) + " " + (draft?.preview(draft.selected) ?: "—"), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(if (operation == DraftOperation.REPLACE) R.string.outside_confirm_hint else R.string.adjust_hint), style = MaterialTheme.typography.bodySmall)
+                EntryCurrencyChoices((draft?.currencies?.get(draft.selected) ?: LocalMoneyUnit.current), model::changeEntryCurrency, !unavailable && operation == DraftOperation.REPLACE)
+
             }
             @Composable fun keys() {
               for (keys in listOf(listOf("1", "2", "3"), listOf("4", "5", "6"), listOf("7", "8", "9"), listOf(".", "0", "backspace"))) {
@@ -55,11 +63,12 @@ fun mealLabel(meal: Meal) = when (meal) {
                 Column(Modifier.weight(1f)) { controls() }
                 Column(Modifier.weight(1f)) { keys() }
             } else Column {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                    Text(stringResource(mealLabel((draft?.selected ?: Meal.OTHER))) + " " + (draft?.preview(draft.selected) ?: "—"), style = MaterialTheme.typography.titleMedium)
-                    Button(onClick = model::saveInline, enabled = !unavailable, modifier = Modifier.testTag("keypad_confirm")) { Text(stringResource(R.string.confirm_amount)) }
+                Row(Modifier.fillMaxWidth().heightIn(min = 32.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Text(stringResource(operationLabel(operation)) + " · " + stringResource(mealLabel((draft?.selected ?: Meal.OTHER))) + " " + (draft?.preview(draft.selected) ?: "—"), style = MaterialTheme.typography.titleMedium)
+
                 }
-                EntryCurrencyChoices((draft?.currencies?.get(draft.selected) ?: LocalMoneyUnit.current), model::changeEntryCurrency, !unavailable)
+                Text(stringResource(if (operation == DraftOperation.REPLACE) R.string.outside_confirm_hint else R.string.adjust_hint), style = MaterialTheme.typography.bodySmall)
+                EntryCurrencyChoices((draft?.currencies?.get(draft.selected) ?: LocalMoneyUnit.current), model::changeEntryCurrency, !unavailable && operation == DraftOperation.REPLACE)
                 keys()
             }
         }

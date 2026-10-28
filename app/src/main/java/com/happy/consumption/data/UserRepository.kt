@@ -140,8 +140,12 @@ class UserRepository(private val manager: UserManager, private val database: App
         if (permit.item.userId != id || permit.session != owner) { LogHelper.info("Security", "Rejected stale or unauthorized record request"); throw AccessDeniedException() }
         permit.amounts.validate(); permit.consume()
         val a = permit.amounts
-        if (database.notes().updateByIdAndUser(permit.item.id, id, a.breakfast, a.lunch, a.dinner, a.other, true, clock.millis(), permit.currencies?.breakfast?.name, permit.currencies?.lunch?.name, permit.currencies?.dinner?.name, permit.currencies?.other?.name) != 1)
-            throw UserOperationException(UserError.RECORD_MISSING)
+        database.withTransaction {
+            if (permit.checkSnapshot && database.notes().queryByIdAndUser(permit.item.id, id)?.toItem() != permit.item)
+                throw UserOperationException(UserError.RECORD_CHANGED)
+            if (database.notes().updateByIdAndUser(permit.item.id, id, a.breakfast, a.lunch, a.dinner, a.other, true, clock.millis(), permit.currencies?.breakfast?.name, permit.currencies?.lunch?.name, permit.currencies?.dinner?.name, permit.currencies?.other?.name) != 1)
+                throw UserOperationException(UserError.RECORD_MISSING)
+        }
         LogHelper.info("Record", "Modify userId=$id date=${permit.item.date} result=success")
         Unit
     }

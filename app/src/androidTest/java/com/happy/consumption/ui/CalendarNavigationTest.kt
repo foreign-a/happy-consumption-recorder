@@ -18,6 +18,10 @@ class CalendarNavigationTest {
     private fun tap(tag: String) { waitTag(tag);rule.onNodeWithTag(tag).performClick() }
     private fun row(date: LocalDate) { waitTag("batch_date_$date");rule.onNodeWithTag("batch_date_$date").performScrollTo().performClick() }
     private fun openDelete() { rule.onNodeWithTag("record_actions").performScrollTo().performClick();tap("batch_delete_entry");waitTag("batch_delete_dialog") }
+    private fun commitOutside() {
+        rule.onNodeWithTag("outside_confirm_area").performTouchInput { click() }
+        waitTag("leave_save");tap("leave_save")
+    }
     @Before fun setup() = runBlocking {
         app.language.select("zh");app.userManager.logout()
         val name="v14-calendar-${System.nanoTime()}"
@@ -37,7 +41,7 @@ class CalendarNavigationTest {
         val note=runBlocking { app.database.notes().queryByUserAndDate(owner.id,date.toString())!! }
         waitTag("record_${note.id}");assertEquals(0L,note.breakfast+note.lunch+note.dinner+note.other)
         rule.onNodeWithTag("batch_delete_dialog").assertDoesNotExist()
-        tap("amount_${note.id}_OTHER");tap("key_7");tap("keypad_confirm")
+        tap("amount_${note.id}_OTHER");tap("key_7");commitOutside()
         rule.waitUntil(15000) { runBlocking { app.database.notes().queryByUserAndDate(owner.id,date.toString())!!.other==700L } }
         tap("calendar_date_$date")
         assertEquals(700L,runBlocking { app.database.notes().queryByUserAndDate(owner.id,date.toString())!!.other })

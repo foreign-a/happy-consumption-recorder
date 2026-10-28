@@ -17,6 +17,10 @@ class Version13UiTest {
     private var todayId=0L
     private fun waitTag(tag: String) { rule.waitUntil(20000) { rule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() } }
     private fun tap(tag: String) { waitTag(tag); rule.onNodeWithTag(tag).performClick() }
+    private fun commitOutside() {
+        rule.onNodeWithTag("outside_confirm_area").performTouchInput { click() }
+        waitTag("leave_save");tap("leave_save")
+    }
     @Before fun setup() {
         runBlocking {
             app.language.select("zh");app.userManager.logout()
@@ -33,7 +37,7 @@ class Version13UiTest {
     }
     @Test fun topIconSwitchesAndKeypadStaysAfterConfirm() {
         rule.onNodeWithTag("tab_user").assertExists();rule.onNodeWithTag("tab_home").assertDoesNotExist()
-        tap("amount_${todayId}_OTHER");tap("key_5");tap("keypad_confirm")
+        tap("amount_${todayId}_OTHER");tap("key_5");commitOutside()
         rule.waitUntil(15000) { runBlocking { app.database.notes().queryByIdAndUser(todayId,owner.id)!!.other==500L } }
         rule.onNodeWithTag("phone_keypad").assertIsDisplayed()
         rule.waitUntil(10000) { try { rule.onNodeWithTag("key_1").assertIsEnabled();true } catch (_: AssertionError) { false } }
@@ -66,7 +70,7 @@ class Version13UiTest {
         tap("tab_user");waitTag("user_page")
         rule.onNodeWithTag("edit_schedule").assertExists()
         val chart="chart_YUAN_$today"
-        waitTag(chart);rule.onNodeWithTag(chart).performScrollTo().performClick()
+        waitTag(chart);rule.onNodeWithTag("monthly_chart_YUAN").performScrollTo();rule.onNodeWithTag(chart).performScrollTo().performClick()
         rule.onNodeWithText("当天消费 ¥10.00").performScrollTo().assertIsDisplayed()
         rule.onNodeWithText("¥1.00").assertExists();rule.onNodeWithText("¥2.00").assertExists()
         rule.onNodeWithText("¥3.00").assertExists();rule.onNodeWithText("¥4.00").assertExists()
@@ -100,6 +104,7 @@ class Version13UiTest {
         waitTag("daily_pie_YUAN");waitTag("daily_pie_DOLLAR")
         rule.onNodeWithTag("share_DINNER").assertTextEquals("¥3.00 · 50.0%")
         rule.onNodeWithTag("share_OTHER").assertTextEquals("$4.00 · 100.0%")
+        rule.onNodeWithTag("monthly_chart_YUAN").performScrollTo()
         rule.onNodeWithTag("chart_YUAN_${today.minusDays(1)}").performScrollTo().performClick()
         rule.onNodeWithTag("daily_pie_YUAN").assertDoesNotExist()
         rule.onNodeWithTag("daily_pie_DOLLAR").assertDoesNotExist()

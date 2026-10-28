@@ -37,6 +37,11 @@ class PersonalSchedule(context: Context, userId: Long) {
         Meal.entries.forEach { editor.putString("chart_${it.name}", valid[it.ordinal]) }
         return editor.commit()
     }
+    fun entryPreferences(): EntryPreferences = EntryPreferences(
+        EntryMode.entries.firstOrNull { it.name == prefs.getString("entry_mode", null) } ?: EntryMode.REPLACE,
+        ConfirmationPlan.entries.firstOrNull { it.name == prefs.getString("confirmation_plan", null) } ?: ConfirmationPlan.CAREFUL)
+    fun saveEntryPreferences(value: EntryPreferences): Boolean = prefs.edit()
+        .putString("entry_mode", value.mode.name).putString("confirmation_plan", value.confirmation.name).commit()
     fun clock(): Clock = object : Clock() {
         override fun getZone(): ZoneId = ZoneId.of(read().zone)
         override fun withZone(zone: ZoneId): Clock = Clock.system(zone)

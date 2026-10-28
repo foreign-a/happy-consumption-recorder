@@ -117,4 +117,20 @@
     <string name="batch_review_count">删除所选 %1$d 条</string>
     <string name="batch_back_selection">返回选择</string>
     <string name="batch_deleted">所选过去记录已删除</string>
+    <string name="entry_mode_title">记账模式</string>
+    <string name="entry_replace">默认模式</string>
+    <string name="entry_replace_option">默认模式：输入新金额</string>
+    <string name="entry_adjust_option">加减模式：输入增减金额</string>
+    <string name="entry_adjust_description">进入加减模式默认为加；双击任意金额切换加／减，状态适用于四项。保存后清空输入，不能减成负数。加减沿用原币种，修改币种请切换默认模式。</string>
+    <string name="confirmation_plan_title">确认方案</string>
+    <string name="confirm_quick">快捷模式</string>
+    <string name="confirm_careful">谨慎模式</string>
+    <string name="quick_description">点击键盘和金额区域外，直接保存后执行所点操作。</string>
+    <string name="careful_description">点击键盘和金额区域外，选择确认保存、放弃更改或继续编辑。</string>
+    <string name="operation_add">加模式</string>
+    <string name="operation_subtract">减模式</string>
+    <string name="outside_confirm_hint">点击键盘与金额区域外确认</string>
+    <string name="adjust_hint">双击金额切换加减；点击编辑区外确认</string>
+    <string name="record_changed">记录已发生变化，请放弃本次输入后重新编辑。</string>
+    <string name="invalid_adjustment">加减后的金额必须在0～9999.99之间，不能减成负数。</string>
 </resources>

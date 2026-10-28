@@ -24,7 +24,7 @@ sealed interface ConfirmationState {
     data class FirstDelete(val item: ConsumptionItem) : ConfirmationState
 }
 
-class ModificationPermit internal constructor(val session: UserSession, val item: ConsumptionItem, val amounts: Amounts, val currencies: EntryCurrencies? = null) {
+class ModificationPermit internal constructor(val session: UserSession, val item: ConsumptionItem, val amounts: Amounts, val currencies: EntryCurrencies? = null, val checkSnapshot: Boolean = false) {
     private var consumed = false
     internal fun consume() {
         if (consumed) throw UserOperationException(UserError.UNCONFIRMED)

@@ -24,6 +24,7 @@ import com.happy.consumption.data.*
         Text(stringResource(R.string.current_user, username), style = MaterialTheme.typography.titleMedium)
         HorizontalDivider()
         if (schedule != null && records != null) {
+            EntryPreferencesControl(schedule, records)
             ScheduleControl(schedule) { records.refreshToday() }
             MonthlyStatistics(records, schedule)
             HorizontalDivider()

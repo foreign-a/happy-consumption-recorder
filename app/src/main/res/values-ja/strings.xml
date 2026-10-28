@@ -118,4 +118,20 @@
     <string name="batch_review_count">選択した%1$d件を削除</string>
     <string name="batch_back_selection">選択に戻る</string>
     <string name="batch_deleted">選択した過去の記録を削除しました</string>
+    <string name="entry_mode_title">記帳モード</string>
+    <string name="entry_replace">通常モード</string>
+    <string name="entry_replace_option">通常：新しい金額を入力</string>
+    <string name="entry_adjust_option">加減算：増減額を入力</string>
+    <string name="entry_adjust_description">加減算は加算から開始。金額をダブルタップすると全項目の加算・減算を切り替えます。保存後は入力を空にし、負数は保存できません。通貨は元のままです。通貨の変更には通常モードを使います。</string>
+    <string name="confirmation_plan_title">確定方法</string>
+    <string name="confirm_quick">クイックモード</string>
+    <string name="confirm_careful">慎重モード</string>
+    <string name="quick_description">キーと金額以外をタップすると保存し、タップした操作を続行します。</string>
+    <string name="careful_description">キーと金額以外をタップすると保存・破棄・編集継続を選択します。</string>
+    <string name="operation_add">加算モード</string>
+    <string name="operation_subtract">減算モード</string>
+    <string name="outside_confirm_hint">キーと金額以外をタップして確定</string>
+    <string name="adjust_hint">金額をダブルタップで加減算切替、領域外をタップして確定</string>
+    <string name="record_changed">記録が変更されました。入力を破棄して再編集してください。</string>
+    <string name="invalid_adjustment">計算後の金額は0～9999.99にしてください。負数にはできません。</string>
 </resources>

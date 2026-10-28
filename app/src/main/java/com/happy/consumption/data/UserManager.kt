@@ -15,7 +15,7 @@ import org.json.JSONObject
 import java.io.File
 
 data class UserSession(val id: Long, val username: String, val generation: Long)
-enum class UserError { EMPTY_NAME, SHORT_PASSWORD, DUPLICATE_NAME, INVALID_LOGIN, INVALID_PASSWORD, NO_SESSION, STORAGE, DATE_EXISTS, INVALID_AMOUNT, INVALID_DATE, RECORD_MISSING, UNCONFIRMED, BACKUP_INVALID, BACKUP_CONFLICT }
+enum class UserError { EMPTY_NAME, SHORT_PASSWORD, DUPLICATE_NAME, INVALID_LOGIN, INVALID_PASSWORD, NO_SESSION, STORAGE, DATE_EXISTS, INVALID_AMOUNT, INVALID_DATE, RECORD_MISSING, UNCONFIRMED, BACKUP_INVALID, BACKUP_CONFLICT, RECORD_CHANGED, INVALID_ADJUSTMENT }
 class UserOperationException(val reason: UserError) : Exception(reason.name)
 class AccessDeniedException : Exception("Access denied")
 

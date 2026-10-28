@@ -118,4 +118,20 @@
     <string name="batch_review_count">Delete %1$d selected</string>
     <string name="batch_back_selection">Back to selection</string>
     <string name="batch_deleted">Selected past records deleted</string>
+    <string name="entry_mode_title">Entry mode</string>
+    <string name="entry_replace">Default mode</string>
+    <string name="entry_replace_option">Default: enter a replacement amount</string>
+    <string name="entry_adjust_option">Add/subtract: enter an adjustment</string>
+    <string name="entry_adjust_description">Adjustments start in Add. Double-tap any amount to switch Add/Subtract for all categories. Saving clears the input. Negative totals are rejected. Adjustments keep the original currency; use Default to change it.</string>
+    <string name="confirmation_plan_title">Confirmation plan</string>
+    <string name="confirm_quick">Quick mode</string>
+    <string name="confirm_careful">Careful mode</string>
+    <string name="quick_description">Tap outside the keypad and amounts to save and continue the tapped action.</string>
+    <string name="careful_description">Tap outside the keypad and amounts to Save, Discard or Keep editing.</string>
+    <string name="operation_add">Add mode</string>
+    <string name="operation_subtract">Subtract mode</string>
+    <string name="outside_confirm_hint">Tap outside the keypad and amounts to confirm</string>
+    <string name="adjust_hint">Double-tap an amount to switch Add/Subtract; tap outside to confirm</string>
+    <string name="record_changed">This record changed. Discard this input and edit again.</string>
+    <string name="invalid_adjustment">The resulting amount must be between 0 and 9999.99; negative totals are not allowed.</string>
 </resources>

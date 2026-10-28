@@ -41,7 +41,7 @@ private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider
             val store = remember(current) { auth.recordsStoreFor(current) }
             val owner = remember { object : ViewModelStoreOwner { override val viewModelStore = store } }
             val records: AllRecordsViewModel = viewModel(viewModelStoreOwner = owner,
-                factory = remember { factory { AllRecordsViewModel(UserRepository(app.userManager, app.database, current, schedule.clock())) } })
+                factory = remember { factory { AllRecordsViewModel(UserRepository(app.userManager, app.database, current, schedule.clock()), initialPreferences = schedule.entryPreferences()) } })
             val lifecycle = LocalLifecycleOwner.current.lifecycle
             DisposableEffect(lifecycle, records) {
                 val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_START) records.refreshToday() }
@@ -52,10 +52,13 @@ private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider
                 var userPage by rememberSaveable { mutableStateOf(false) }
                 val listState = rememberLazyListState()
                 val homeState = rememberSaveableStateHolder()
+                val regions = remember { mutableMapOf<String, androidx.compose.ui.geometry.Rect>() }
+                ModeInteractionRoot(records, regions, !userPage) {
+                CompositionLocalProvider(LocalEditRegions provides regions) {
                 Column(Modifier.fillMaxSize().safeDrawingPadding()) {
                     Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(stringResource(if (userPage) R.string.tab_user else R.string.app_name),
-                            style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                            style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).testTag("outside_confirm_area"))
                         IconButton(onClick = { records.leave { userPage = !userPage } },
                             modifier = Modifier.testTag(if (userPage) "tab_home" else "tab_user")) {
                             Icon(painterResource(if (userPage) R.drawable.nav_home else R.drawable.nav_user),
@@ -66,6 +69,8 @@ private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider
                         if (userPage) UserScreen(current.username, auth, app.language, backup, schedule, records)
                         else homeState.SaveableStateProvider("home") { AllRecordsScreen(records, current.username, auth, app.language, backup, listState, schedule) }
                     }
+                }
+                }
                 }
             }
         }

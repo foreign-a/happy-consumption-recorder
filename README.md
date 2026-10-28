@@ -1,63 +1,54 @@
 # 快乐消费记录 · Happy Consumption Recorder
 
-轻量、离线的 Android 消费记录应用，按天记录早餐、午餐、晚餐和其他支出。
+轻量离线 Android 应用，按天记录早餐、午餐、晚餐和其他支出。
 
-**v1.4 · Android 8.0+ · 中文 / English / 日本語 · 无网络权限**
+**v1.5 · Android 8.0+ · 中文 / English / 日本語 · 无网络权限**
 
-[下载 v1.4 APK](https://github.com/foreign-a/happy-consumption-recorder/releases/download/v1.4/app-release_1.4.apk) · [Release 与校验文件](https://github.com/foreign-a/happy-consumption-recorder/releases/tag/v1.4) · [反馈问题](https://github.com/foreign-a/happy-consumption-recorder/issues)
+[下载 v1.5 APK](https://github.com/foreign-a/happy-consumption-recorder/releases/download/v1.5/app-release_1.5.apk) · [Release 与校验文件](https://github.com/foreign-a/happy-consumption-recorder/releases/tag/v1.5)
 
-## v1.4 更新
+## v1.5 更新
 
-- **过去记录多选删除**：点击日期行“⋯ → 删除”，按月份勾选记录，支持跨月选择和全选/取消本月。核对日期与数量后统一确认删除；单个日期也走同一流程。今天和未来日期不在可删除范围内。
-- **日历直接创建零记录**：点按没有记录的过去日期，立即创建四项全零记录并打开，无需生成确认。新记录使用当前账户默认币种，重复点击不覆盖已有金额或币种。
-- 删除操作使用数据库事务；失败时整批回滚。未确认金额草稿仍需先保存、放弃或继续编辑。
+- 用户页新增记账模式：默认模式输入新金额替换原值；加减模式输入本次增减金额。进入加减模式默认为加，双击任意金额切换加／减，状态适用于四项消费。保存后清空本次输入并保持当前编辑项，可以连续记账。
+- 减模式背景从双击位置以圆形扩散为红色，再次双击任意金额恢复加模式与原背景。金额不能减成负数，也不能超过9999.99。加减沿用原币种；修改币种请切换默认模式。
+- 移除金额确认按钮。点击键盘和四项金额区域外（含空白与导航按钮）处理本次输入。用户页可选择快捷模式直接保存，或谨慎模式选择“确认保存／放弃更改／继续编辑”。首次升级默认谨慎模式。
+- 设置按账户保存在本机。保存失败保留输入；加减保存前核对原记录，避免覆盖已变更的数据。
 
-本次从 v1.2 直接更新至 v1.4，包含此前本地完成的以下功能，不另发布 v1.3 系列：
+沿用官方签名，直接覆盖安装旧官方版本，不要先卸载。已验证正式v1.4 → v1.5，77条合成记录、账户凭据及原有偏好保持一致。数据库结构未变。消费备份兼容旧格式；记账方式、确认方案、时区、三餐和配色均属本机偏好，不包含在消费备份中。
 
-- **单日首页与常驻键盘**：首页只展示所选一天，默认是用户时区的今天。点按金额输入并确认保存；右上角图标切换首页与用户页。
-- **时区与三餐时间**：用户页设置 IANA 时区及三餐时刻。打开应用时建议距离当前时间最近且不超过3小时的餐次，其他时段选中“其他”；有未确认草稿时保留草稿。
-- **月度与每日统计**：圆角条形图展示每日消费，点击某天查看四项金额和合计；饼图展示每日占比，支持为四类消费选择预设色、输入RGB色值或恢复默认。配色按账户保存，重启后保留。
+65项JVM测试、20项Android设备测试通过；构建和Lint通过（0错误、15项警告）。验证设备为MuMu Android12/API32，实体手机尚未验证。
 
-## 功能与使用
+## 原有功能
 
-1. 创建本地账户并登录，今日零记录自动生成。每项金额支持 `0～9999.99`，最多两位小数；输入新值替换原值，留空保留，输入 `0` 归零，点击“确认”保存。
-2. 通过最近七天日期栏或展开月历查看历史；空白过去日期直接创建零记录。未来日期不可创建。
-3. 四项金额分别支持人民币 `¥`、美元 `$`、英镑 `£`。合计、月度图表和每日占比按币种分别计算，不进行汇率转换。
-4. 用户页管理时区、三餐时间、语言、默认币种、备份与账户。默认币种只用于新增记录，不重标历史金额。
-5. 日期行“⋯”菜单保留生成过去30天记录和多选删除。账户数据彼此隔离；删除账户需要当前密码。
+- 单日平面首页与常驻数字键盘，右上角切换首页与用户页。通过七天日期栏或月历查看过去记录；空白过去日期直接创建全零记录，未来日期不可创建。
+- 日期行“⋯ → 删除”统一选择过去记录，支持跨月多选、全选本月和核对后批量删除，事务失败整批回滚。今天和未来日期受保护。
+- 按账户设置IANA时区及三餐时间，打开应用时建议最近且不超过3小时的餐次，其余时段选中其他。
+- 月度每日消费圆角条形图、点击日期查看四项明细与合计、每日占比饼图及自定义四类颜色。
+- 人民币、美元、英镑分别统计，不作汇率转换；每项金额范围0～9999.99，最多两位小数。默认模式留空保持原值，输入0归零；加减模式输入0不改变金额。
+- 本地多账户隔离、中文/英文/日文、加密备份恢复、验证密码删除账户。默认币种仅用于新增记录。
 
 ## 界面预览
 
-| 单日首页 | 日期多选删除 | 每日占比与配色 |
+| 加模式 | 减模式 | 用户设置 |
 | --- | --- | --- |
-| <img src="docs/images/v14-calendar-zero.png" width="260" alt="点击过去日期创建零记录"> | <img src="docs/images/v14-batch-selection.png" width="260" alt="跨月多选过去记录"> | <img src="docs/images/statistics-pie.png" width="260" alt="四项消费占比和自定义颜色"> |
+| <img src="docs/images/v15-add.png" width="260" alt="加模式与常驻键盘"> | <img src="docs/images/v15-subtract.png" width="260" alt="减模式红色背景"> | <img src="docs/images/v15-settings.png" width="260" alt="记账模式和确认方案"> |
 
-截图来自专用模拟器与合成测试账户。用户页及横屏内容可滚动。
+截图来自合成测试账户，用户页及横屏内容可以滚动。
 
-## 安装、升级与备份
+## 安装与备份
 
-下载 Release 下的 `app-release_1.4.apk`，在 Android 8.0 或更高版本安装。**从旧官方版本升级请直接覆盖安装，不要先卸载。** v1.4 沿用正式签名；已验证从 v1.3.1 覆盖升级，账户、记录和时间/配色偏好均保留。数据库结构沿用现有版本。
-
-卸载或清除应用数据会删除本地数据。操作前请在“用户 → 备份与恢复”按账户导出 `.hcrbackup` 文件，设置并记住至少8字符的独立备份密码，将文件保存到应用外。重装后从登录页导入，再使用原账户密码登录。无云同步或密码找回功能。
-
-消费备份继续兼容旧格式与逐项币种；时区、三餐时间和配色属于本机账户偏好，不包含在消费备份中，导入后需重新设置。同名账户、错误密码或无效文件不会覆盖已有记录。
+覆盖安装旧官方版本可以保留本地账户和记录。卸载或清除数据前，在“用户 → 备份与恢复”按账户导出`.hcrbackup`，记住至少8字符的独立备份密码，文件保存在应用外。恢复后使用原账户密码登录。无云同步或密码找回。
 
 ## 验证
 
-- 58项JVM单元测试、12项Android设备测试、10项最终正式包检查通过。
-- 覆盖跨月选择、确认与取消、事务回滚、用户隔离、过期会话、并发创建、已有金额/币种保留，以及既有记账与统计回归。
-- 构建和静态检查通过，Lint 0错误、12项建议性警告。
-- MuMu Android 12 / API32 验证；实体手机尚未验证。
-- 正式包2,266,374字节，证书与旧官方版本相同，v2/v3签名验证通过。
-- SHA-256：`2cc9b47e268edbdaeb1ae1b480835041c60fc9dcf6656f4a4cbaa53d9d2e9c89`
+[详细验收摘要](docs/reports/version-1.5-report.md)。正式包沿用原证书，v2/v3签名通过。
 
-[详细验收摘要](docs/reports/version-1.4-report.md)
+SHA-256：`1bd009f8ae2ed25f83b47b29df170be165be2a39e5de86d8898ac105666351d6`
 
 ## English / 日本語
 
-v1.4 adds multi-date deletion across months with one final confirmation. Today and future dates are protected. Tap a missing past calendar date to create a zero record immediately. Home shows one day with a persistent keypad; User provides time-zone and meal settings, monthly bars and customizable daily pie charts. Currencies are counted separately. Install over older official versions to retain data. Export each account before uninstalling; local time and color preferences are not part of spending backups.
+v1.5 adds per-account Replace or Add/Subtract entry modes. Double-tap any amount to toggle the shared operation; subtract reveals a red background from the tap position. Tap outside the keypad and four amount areas to save immediately (Quick), or choose Save/Discard/Keep editing (Careful, default). Saved deltas clear for continuous entry. Negative results are rejected. Install over the previous official version to retain records.
 
-v1.4では月をまたぐ過去の記録を複数選択して一括削除できます。今日と未来は対象外です。カレンダーの空白の過去日をタップするとゼロ記録を作成します。タイムゾーン・食事時刻、月別グラフ、色を設定できる日別円グラフにも対応します。通貨別に集計します。旧公式版へ上書き更新し、削除前にはアカウントごとにバックアップしてください。
+v1.5では置換／加減算モードを設定できます。金額をダブルタップすると加算と減算が切り替わり、減算時は背景が円形に赤く広がります。入力領域の外側をタップして即時保存、または保存・破棄・編集続行を選択します（初期設定）。旧公式版へ上書き更新してください。
 
 ## 从源码构建
 
@@ -85,4 +76,4 @@ cd happy-consumption-recorder
 
 ## 隐私与许可
 
-应用无网络权限，无广告、云同步或数据上传。密码使用加盐散列，Room记录按账户隔离。[GNU GPL v3](LICENSE)。
+无网络权限、广告、上传或云同步。数据保存在本机，密码采用加盐散列，消费记录按账户隔离。[GNU GPL v3](LICENSE)。

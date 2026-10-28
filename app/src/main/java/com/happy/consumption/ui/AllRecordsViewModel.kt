@@ -20,12 +20,37 @@ data class BatchDeleteState(val month: java.time.YearMonth, val records: List<Co
 
 data class DateJump(val id: Long, val date: String)
 
+data class ModeReveal(val id: Long = 0, val subtract: Boolean = false, val x: Float = 0f, val y: Float = 0f, val fromSubtract: Boolean = false)
+
 data class RecordsState(val records: List<ConsumptionItem> = emptyList(), val count: Int = 0,
     val loading: Boolean = true, val error: Boolean = false)
 
-class AllRecordsViewModel(private val repository: RecordsRepository, private val workScope: CoroutineScope? = null) : ViewModel() {
+class AllRecordsViewModel(private val repository: RecordsRepository, private val workScope: CoroutineScope? = null, initialPreferences: EntryPreferences = EntryPreferences()) : ViewModel() {
     private val scope get() = workScope ?: viewModelScope
     val state = MutableStateFlow(RecordsState())
+    val entryPreferences = MutableStateFlow(initialPreferences)
+    val operation = MutableStateFlow(if (initialPreferences.mode == EntryMode.ADJUST) DraftOperation.ADD else DraftOperation.REPLACE)
+    val modeReveal = MutableStateFlow(ModeReveal())
+    val focusedAmount = MutableStateFlow<Pair<Long, Meal>?>(null)
+    fun configureEntry(value: EntryPreferences) {
+        if (busy.value || inline.value?.changed == true) return
+        val changedMode = entryPreferences.value.mode != value.mode
+        entryPreferences.value = value
+        if (changedMode) {
+            val wasSubtract = operation.value == DraftOperation.SUBTRACT
+            operation.value = if (value.mode == EntryMode.ADJUST) DraftOperation.ADD else DraftOperation.REPLACE
+            inline.value = null
+            modeReveal.value = ModeReveal(modeReveal.value.id + 1, false, fromSubtract = wasSubtract)
+        }
+    }
+    fun doubleTapAmount(item: ConsumptionItem, meal: Meal, x: Float, y: Float) {
+        if (entryPreferences.value.mode != EntryMode.ADJUST) { editAmount(item, meal); return }
+        leave {
+            operation.value = if (operation.value == DraftOperation.SUBTRACT) DraftOperation.ADD else DraftOperation.SUBTRACT
+            modeReveal.value = ModeReveal(modeReveal.value.id + 1, operation.value == DraftOperation.SUBTRACT, x, y, operation.value != DraftOperation.SUBTRACT)
+            editAmount(selectedRecord.value?.takeIf { it.id == item.id } ?: item, meal)
+        }
+    }
     val batchDelete = MutableStateFlow<BatchDeleteState?>(null)
     private var batchRequest = 0
     fun openBatchDelete() = leave {
@@ -136,7 +161,11 @@ class AllRecordsViewModel(private val repository: RecordsRepository, private val
         }
     }
     private suspend fun loadSelected() {
-        selectedRecord.value = repository.range(selectedDate.value, selectedDate.value).firstOrNull()
+        val row = repository.range(selectedDate.value, selectedDate.value).firstOrNull()
+        selectedRecord.value = row
+        val draft = inline.value
+        if (row != null && draft != null && !draft.changed && draft.item.id == row.id && draft.item != row)
+            inline.value = draft.copy(item = row, inputs = List(4) { "" }, currencies = row.currencies)
     }
     val busy = MutableStateFlow(false)
     val message = MutableStateFlow<Int?>(null)
@@ -218,7 +247,7 @@ class AllRecordsViewModel(private val repository: RecordsRepository, private val
         scope.launch { pages++; load() }
     }
     fun refreshToday() {
-        if (inline.value?.changed != true) { inline.value = null; selectedDate.value = dates.today().toString() }
+        if (inline.value?.changed != true) { inline.value = null; focusedAmount.value = null; selectedDate.value = dates.today().toString() }
         scope.launch {
             try { repository.ensureToday(); state.value = state.value.copy(error = false); load() }
             catch (e: CancellationException) { throw e }
@@ -248,16 +277,21 @@ class AllRecordsViewModel(private val repository: RecordsRepository, private val
             leave { editAmount(item, meal, clearMessage) }; return
         }
         if (clearMessage) message.value = null
-        inline.value = current?.copy(selected = meal) ?: InlineDraft(item, meal)
+        focusedAmount.value = item.id to meal
+        inline.value = current?.copy(selected = meal) ?: InlineDraft(item, meal, operation = operation.value)
     }
     fun pressKey(key: String) { if (!busy.value && !leavePrompt.value) { inline.value = inline.value?.press(key); message.value = null } }
     fun changeEntryCurrency(unit: MoneyUnit) {
-        if (busy.value || leavePrompt.value) return
+        if (busy.value || leavePrompt.value || operation.value != DraftOperation.REPLACE) return
         inline.value = inline.value?.let { it.copy(currencies = it.currencies.replacing(it.selected, unit)) }
     }
     fun leave(action: () -> Unit = {}) {
         if (busy.value || leavePrompt.value) return
-        if (inline.value?.changed == true) { afterLeaving = action; leavePrompt.value = true }
+        if (inline.value?.changed == true) {
+            afterLeaving = action
+            if (entryPreferences.value.confirmation == ConfirmationPlan.QUICK) saveInline()
+            else leavePrompt.value = true
+        }
         else { inline.value = null; action() }
     }
     fun keepEditing() { leavePrompt.value = false; afterLeaving = null }
@@ -275,7 +309,7 @@ class AllRecordsViewModel(private val repository: RecordsRepository, private val
         busy.value = true; message.value = null
         scope.launch {
             try {
-                val permit = ModificationPermit(repository.session, draft.item, amounts, draft.currencies)
+                val permit = ModificationPermit(repository.session, draft.item, amounts, draft.currencies, checkSnapshot = draft.operation != DraftOperation.REPLACE)
                 repository.modify(permit)
                 val action = afterLeaving
                 inline.value = null; afterLeaving = null; leavePrompt.value = false

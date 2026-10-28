@@ -16,6 +16,8 @@ fun errorMessage(error: Exception): Int = when (error) {
         UserError.INVALID_AMOUNT -> R.string.invalid_amount
         UserError.INVALID_DATE -> R.string.invalid_date
         UserError.STORAGE -> R.string.storage_error
+        UserError.INVALID_ADJUSTMENT -> R.string.invalid_adjustment
+        UserError.RECORD_CHANGED -> R.string.record_changed
         UserError.RECORD_MISSING -> R.string.record_missing
         UserError.UNCONFIRMED -> R.string.confirmation_required
         UserError.BACKUP_INVALID -> R.string.backup_invalid
