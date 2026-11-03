@@ -84,7 +84,7 @@
     <string name="discard_changes">変更を破棄</string>
     <string name="keep_editing">編集を続ける</string>
     <string name="tap_amount_hint">新しい金額を入力。空欄は元の値を維持</string>
-    <string name="key_backspace">最後の桁を削除</string>
+    <string name="key_backspace">最後の桁を削除。2秒長押しで連続削除</string>
     <string name="tab_home">ホーム</string>
     <string name="tab_user">ユーザー</string>
     <string name="calendar_expand">月表示を開く</string>
@@ -126,8 +126,10 @@
     <string name="confirmation_plan_title">確定方法</string>
     <string name="confirm_quick">クイックモード</string>
     <string name="confirm_careful">慎重モード</string>
-    <string name="quick_description">キーと金額以外をタップすると保存し、タップした操作を続行します。</string>
-    <string name="careful_description">キーと金額以外をタップすると保存・破棄・編集継続を選択します。</string>
+    <string name="quick_description">別の金額またはキーと金額の外側をタップすると保存して操作を続行します。</string>
+    <string name="careful_description">キー右上の確定で保存。領域外をタップすると保存・破棄・編集継続を選択します。</string>
+    <string name="quick_keypad_hint">別の金額・領域外で保存。⌫を2秒長押しで連続削除</string>
+    <string name="careful_keypad_hint">確定で保存、領域外で確認。⌫を2秒長押しで連続削除</string>
     <string name="operation_add">加算モード</string>
     <string name="operation_subtract">減算モード</string>
     <string name="outside_confirm_hint">キーと金額以外をタップして確定</string>

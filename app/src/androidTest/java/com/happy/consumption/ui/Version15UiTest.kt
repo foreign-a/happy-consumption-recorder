@@ -38,8 +38,8 @@ class Version15UiTest {
         waitTag("phone_keypad");waitTag("amount_${id}_BREAKFAST")
         rule.waitUntil(15000) { rule.onAllNodesWithText("¥10.00").fetchSemanticsNodes().size>=2 }
     }
-    @Test fun defaultCarefulOutsideOffersKeepDiscardAndSaveWithoutConfirmButton() {
-        rule.onNodeWithTag("keypad_confirm").assertDoesNotExist()
+    @Test fun defaultCarefulOutsideStillOffersKeepDiscardAndSave() {
+        rule.onNodeWithTag("key_confirm").assertExists().assertIsNotEnabled()
         tap("amount_${id}_BREAKFAST");tap("key_2");outside();waitTag("leave_keep")
         assertEquals(1000L,value());tap("leave_keep");assertEquals(1000L,value())
         outside();tap("leave_discard");assertEquals(1000L,value())

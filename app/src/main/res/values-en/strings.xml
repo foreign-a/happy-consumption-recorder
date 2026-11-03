@@ -84,7 +84,7 @@
     <string name="discard_changes">Discard</string>
     <string name="keep_editing">Keep editing</string>
     <string name="tap_amount_hint">Enter a replacement; leave blank to keep the value</string>
-    <string name="key_backspace">Delete last digit</string>
+    <string name="key_backspace">Delete last digit; hold 2 seconds to repeat</string>
     <string name="tab_home">Home</string>
     <string name="tab_user">User</string>
     <string name="calendar_expand">Expand month</string>
@@ -126,8 +126,10 @@
     <string name="confirmation_plan_title">Confirmation plan</string>
     <string name="confirm_quick">Quick mode</string>
     <string name="confirm_careful">Careful mode</string>
-    <string name="quick_description">Tap outside the keypad and amounts to save and continue the tapped action.</string>
-    <string name="careful_description">Tap outside the keypad and amounts to Save, Discard or Keep editing.</string>
+    <string name="quick_description">Select another amount or tap outside the keypad and amounts to save and continue.</string>
+    <string name="careful_description">Tap Confirm at the top right of the keypad to save, or tap outside to Save, Discard or Keep editing.</string>
+    <string name="quick_keypad_hint">Select another amount or tap outside to save. Hold ⌫ 2s to repeat.</string>
+    <string name="careful_keypad_hint">Confirm to save; tap outside to review. Hold ⌫ 2s to repeat.</string>
     <string name="operation_add">Add mode</string>
     <string name="operation_subtract">Subtract mode</string>
     <string name="outside_confirm_hint">Tap outside the keypad and amounts to confirm</string>

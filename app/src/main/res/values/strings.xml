@@ -83,7 +83,7 @@
     <string name="discard_changes">放弃更改</string>
     <string name="keep_editing">继续编辑</string>
     <string name="tap_amount_hint">输入新金额，留空保留原值</string>
-    <string name="key_backspace">删除最后一位</string>
+    <string name="key_backspace">删除最后一位；长按2秒连续删除</string>
     <string name="tab_home">首页</string>
     <string name="tab_user">用户</string>
     <string name="calendar_expand">展开月历</string>
@@ -125,8 +125,10 @@
     <string name="confirmation_plan_title">确认方案</string>
     <string name="confirm_quick">快捷模式</string>
     <string name="confirm_careful">谨慎模式</string>
-    <string name="quick_description">点击键盘和金额区域外，直接保存后执行所点操作。</string>
-    <string name="careful_description">点击键盘和金额区域外，选择确认保存、放弃更改或继续编辑。</string>
+    <string name="quick_description">切换到其他金额，或点击键盘和金额区域外，直接保存后继续操作。</string>
+    <string name="careful_description">点击键盘右上角确认保存；点击键盘和金额区域外，选择确认保存、放弃更改或继续编辑。</string>
+    <string name="quick_keypad_hint">切换金额或点击编辑区外保存；长按⌫ 2秒连删</string>
+    <string name="careful_keypad_hint">点确认保存，点编辑区外核对；长按⌫ 2秒连删</string>
     <string name="operation_add">加模式</string>
     <string name="operation_subtract">减模式</string>
     <string name="outside_confirm_hint">点击键盘与金额区域外确认</string>

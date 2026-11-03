@@ -273,8 +273,12 @@ class AllRecordsViewModel(private val repository: RecordsRepository, private val
     fun editAmount(item: ConsumptionItem, meal: Meal, clearMessage: Boolean = true) {
         if (busy.value || state.value.error || dialog.value != ConfirmationState.Idle || batchDelete.value != null) return
         val current = inline.value
-        if (current != null && current.item.id != item.id) {
-            leave { editAmount(item, meal, clearMessage) }; return
+        if (current != null && (current.item.id != item.id ||
+            (current.selected != meal && current.changed && entryPreferences.value.confirmation == ConfirmationPlan.QUICK))) {
+            leave {
+                val fresh = selectedRecord.value?.takeIf { it.id == item.id } ?: item
+                editAmount(fresh, meal, clearMessage)
+            }; return
         }
         if (clearMessage) message.value = null
         focusedAmount.value = item.id to meal

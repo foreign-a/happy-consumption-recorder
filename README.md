@@ -2,24 +2,26 @@
 
 轻量离线 Android 应用，按天记录早餐、午餐、晚餐和其他支出。
 
-**v1.5 · Android 8.0+ · 中文 / English / 日本語 · 无网络权限**
+**v1.6 · Android 8.0+ · 中文 / English / 日本語 · 无网络权限**
 
-[下载 v1.5 APK](https://github.com/foreign-a/happy-consumption-recorder/releases/download/v1.5/app-release_1.5.apk) · [Release 与校验文件](https://github.com/foreign-a/happy-consumption-recorder/releases/tag/v1.5)
+[下载 v1.6 APK](https://github.com/foreign-a/happy-consumption-recorder/releases/download/v1.6/app-release_1.6.apk) · [Release 与校验文件](https://github.com/foreign-a/happy-consumption-recorder/releases/tag/v1.6)
 
-## v1.5 更新
+## v1.6 更新
 
-- 用户页新增记账模式：默认模式输入新金额替换原值；加减模式输入本次增减金额。进入加减模式默认为加，双击任意金额切换加／减，状态适用于四项消费。保存后清空本次输入并保持当前编辑项，可以连续记账。
-- 减模式背景从双击位置以圆形扩散为红色，再次双击任意金额恢复加模式与原背景。金额不能减成负数，也不能超过9999.99。加减沿用原币种；修改币种请切换默认模式。
-- 移除金额确认按钮。点击键盘和四项金额区域外（含空白与导航按钮）处理本次输入。用户页可选择快捷模式直接保存，或谨慎模式选择“确认保存／放弃更改／继续编辑”。首次升级默认谨慎模式。
-- 设置按账户保存在本机。保存失败保留输入；加减保存前核对原记录，避免覆盖已变更的数据。
+- 修复数字键盘黑边，键盘采用当前主题的平面背景，减模式同步显示红色。
+- 快捷模式下，修改一项金额后，点击其余三项中的任意一项即可保存本次输入并继续编辑所选金额，无需等四项都改完再点击空白。单击当前正在编辑的金额不会触发保存；点击输入区域外仍可直接保存。
+- 谨慎模式的键盘右上角新增确认按钮，可直接保存当前草稿。四项金额之间仍可连续编辑；点击输入区域外时仍显示“确认保存／放弃更改／继续编辑”。未设置过确认方案的账户默认谨慎模式，升级保留已有选择。
+- 所有模式均支持长按删除键：持续按住2秒后快速逐位删除，松手即停。
 
-沿用官方签名，直接覆盖安装旧官方版本，不要先卸载。已验证正式v1.4 → v1.5，77条合成记录、账户凭据及原有偏好保持一致。数据库结构未变。消费备份兼容旧格式；记账方式、确认方案、时区、三餐和配色均属本机偏好，不包含在消费备份中。
+沿用官方签名，直接覆盖安装旧官方版本，不要先卸载。数据库结构未变。消费备份兼容旧格式；记账方式、确认方案、时区、三餐和配色均属本机偏好，不包含在消费备份中。
 
-65项JVM测试、20项Android设备测试通过；构建和Lint通过（0错误、15项警告）。验证设备为MuMu Android12/API32，实体手机尚未验证。
+74项JVM单元测试、31项Android设备回归测试通过；调试和正式构建通过，Lint为0错误、17项警告。
 
 ## 原有功能
 
 - 单日平面首页与常驻数字键盘，右上角切换首页与用户页。通过七天日期栏或月历查看过去记录；空白过去日期直接创建全零记录，未来日期不可创建。
+- 用户页按账户选择默认模式或加减模式，以及快捷或谨慎确认方案。默认模式输入新金额替换原值；加减模式输入本次增减金额，进入时默认为加，双击任意金额切换适用于四项消费的加／减操作。减模式从双击位置以圆形扩散为红色，再次双击恢复加模式与原背景。保存后清空本次输入并保留编辑位置，可以连续记账。
+- 加减沿用原币种；修改币种请切换默认模式。保存失败保留输入；加减保存前核对原记录，避免覆盖已变更的数据。设置按账户保存在本机。
 - 日期行“⋯ → 删除”统一选择过去记录，支持跨月多选、全选本月和核对后批量删除，事务失败整批回滚。今天和未来日期受保护。
 - 按账户设置IANA时区及三餐时间，打开应用时建议最近且不超过3小时的餐次，其余时段选中其他。
 - 月度每日消费圆角条形图、点击日期查看四项明细与合计、每日占比饼图及自定义四类颜色。
@@ -28,9 +30,9 @@
 
 ## 界面预览
 
-| 加模式 | 减模式 | 用户设置 |
+| 谨慎模式 | 快捷模式 | 减模式 |
 | --- | --- | --- |
-| <img src="docs/images/v15-add.png" width="260" alt="加模式与常驻键盘"> | <img src="docs/images/v15-subtract.png" width="260" alt="减模式红色背景"> | <img src="docs/images/v15-settings.png" width="260" alt="记账模式和确认方案"> |
+| <img src="docs/images/v16-careful.png" width="260" alt="谨慎模式键盘右上角确认按钮"> | <img src="docs/images/v16-quick.png" width="260" alt="快捷模式与平面数字键盘"> | <img src="docs/images/v16-subtract.png" width="260" alt="减模式红色背景与平面键盘"> |
 
 截图来自合成测试账户，用户页及横屏内容可以滚动。
 
@@ -40,15 +42,15 @@
 
 ## 验证
 
-[详细验收摘要](docs/reports/version-1.5-report.md)。正式包沿用原证书，v2/v3签名通过。
+[详细验收摘要](docs/reports/version-1.6-report.md)。正式包沿用原证书，签名及升级验证结果见验收摘要。
 
-SHA-256：`1bd009f8ae2ed25f83b47b29df170be165be2a39e5de86d8898ac105666351d6`
+SHA-256：`8c1b4a6ab1750e774f5a7b93bfd4582efa3bea5d80049febf9dc2a2ddf24ee89`
 
 ## English / 日本語
 
-v1.5 adds per-account Replace or Add/Subtract entry modes. Double-tap any amount to toggle the shared operation; subtract reveals a red background from the tap position. Tap outside the keypad and four amount areas to save immediately (Quick), or choose Save/Discard/Keep editing (Careful, default). Saved deltas clear for continuous entry. Negative results are rejected. Install over the previous official version to retain records.
+v1.6 removes the keypad's dark edge. In Quick mode, selecting another of the four amounts saves pending input and moves to that amount. Careful mode adds a confirmation button at the keypad's top right; tapping outside still offers Save/Discard/Keep editing. In every mode, hold Delete for 2 seconds to start deleting digits repeatedly; release to stop. Per-account Replace and Add/Subtract modes remain available. Double-tap any amount to toggle the shared operation; subtract reveals a red background from the tap position. Saved deltas clear for continuous entry, and negative results are rejected. Install over the previous official version to retain records.
 
-v1.5では置換／加減算モードを設定できます。金額をダブルタップすると加算と減算が切り替わり、減算時は背景が円形に赤く広がります。入力領域の外側をタップして即時保存、または保存・破棄・編集続行を選択します（初期設定）。旧公式版へ上書き更新してください。
+v1.6では数字キーボードの黒い縁を修正しました。クイックモードでは、別の金額をタップすると入力中の金額を保存して編集先を移します。慎重モードではキーボード右上の確認ボタンで直接保存でき、入力領域の外側では従来どおり保存・破棄・編集続行を選べます。全モードで削除キーを2秒間押し続けると1桁ずつ連続削除し、指を離すと停止します。置換／加減算モード、金額のダブルタップによる加算・減算の切り替え、減算時の赤い背景も引き続き利用できます。旧公式版へ上書き更新してください。
 
 ## 从源码构建
 
