@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.happy.consumption.R
 import com.happy.consumption.data.*
@@ -39,7 +40,7 @@ private fun chartColor(hex: String) = Color(android.graphics.Color.parseColor(he
             val summary = shares.filter { item.currencies[it.meal] == unit }.joinToString("; ") {
                 item.currencies[it.meal].format(it.amount) + " " + String.format(locale, "%.1f%%", it.fraction * 100)
             }
-            Text(unit.format(shares.sumOf { it.amount }), style = MaterialTheme.typography.titleMedium)
+            Text(unit.format(item.totalCents(unit)), style = MaterialTheme.typography.titleMedium)
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Canvas(Modifier.size(192.dp).padding(4.dp).testTag("daily_pie_${unit.name}")
                     .semantics { contentDescription = item.date + " " + summary }) {
@@ -58,7 +59,7 @@ private fun chartColor(hex: String) = Color(android.graphics.Color.parseColor(he
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(mealLabel(share.meal)), Modifier.weight(1f))
                     Text(unit.format(share.amount) + " · " + String.format(locale, "%.1f%%", share.fraction * 100),
-                        modifier = Modifier.testTag("share_${share.meal.name}"))
+                        modifier = Modifier.weight(3f).testTag("share_${share.meal.name}"), textAlign = TextAlign.End)
                 }
             }
         }

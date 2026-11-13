@@ -47,7 +47,7 @@ class InlineEditTest {
         assertEquals(Amounts(0,0,0,500),InlineDraft(original,Meal.BREAKFAST).press("0").amounts())
     }
     @Test fun invalidAndIncompleteInputsCannotCommit() {
-        for (text in listOf("10000","0.001","0.")) {
+        for (text in listOf("92233720368547758.08","0.001","0.")) {
             val draft=InlineDraft(original,Meal.BREAKFAST,inputs=listOf(text,"","",""))
             try { draft.amounts();fail() } catch (_:UserOperationException) { }
         }

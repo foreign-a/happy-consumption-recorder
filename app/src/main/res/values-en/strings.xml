@@ -37,7 +37,7 @@
     <string name="dinner">Dinner</string>
     <string name="other">Other</string>
     <string name="save">Save</string>
-    <string name="invalid_amount">Amount must be between 0 and 9999.99, with at most two decimal places</string>
+    <string name="invalid_amount">Enter a non-negative amount with at most two decimal places, within the integer minor-unit storage range</string>
     <string name="invalid_date">Enter a valid date no later than today</string>
     <string name="date_exists">A record already exists for this date</string>
     <string name="record_missing">Record no longer exists. Please retry.</string>
@@ -84,7 +84,7 @@
     <string name="discard_changes">Discard</string>
     <string name="keep_editing">Keep editing</string>
     <string name="tap_amount_hint">Enter a replacement; leave blank to keep the value</string>
-    <string name="key_backspace">Delete last digit; hold 2 seconds to repeat</string>
+    <string name="key_backspace">Delete last digit; hold 400 milliseconds to delete every 80 milliseconds; release to stop</string>
     <string name="tab_home">Home</string>
     <string name="tab_user">User</string>
     <string name="calendar_expand">Expand month</string>
@@ -128,12 +128,12 @@
     <string name="confirm_careful">Careful mode</string>
     <string name="quick_description">Select another amount or tap outside the keypad and amounts to save and continue.</string>
     <string name="careful_description">Tap Confirm at the top right of the keypad to save, or tap outside to Save, Discard or Keep editing.</string>
-    <string name="quick_keypad_hint">Select another amount or tap outside to save. Hold ⌫ 2s to repeat.</string>
-    <string name="careful_keypad_hint">Confirm to save; tap outside to review. Hold ⌫ 2s to repeat.</string>
+    <string name="quick_keypad_hint">Select another amount or tap outside to save. Hold ⌫ 0.4s to repeat.</string>
+    <string name="careful_keypad_hint">Confirm to save; tap outside to review. Hold ⌫ 0.4s to repeat.</string>
     <string name="operation_add">Add mode</string>
     <string name="operation_subtract">Subtract mode</string>
     <string name="outside_confirm_hint">Tap outside the keypad and amounts to confirm</string>
     <string name="adjust_hint">Double-tap an amount to switch Add/Subtract; tap outside to confirm</string>
     <string name="record_changed">This record changed. Discard this input and edit again.</string>
-    <string name="invalid_adjustment">The resulting amount must be between 0 and 9999.99; negative totals are not allowed.</string>
+    <string name="invalid_adjustment">The resulting amount must be non-negative and within the integer minor-unit storage range.</string>
 </resources>

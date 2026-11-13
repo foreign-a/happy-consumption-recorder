@@ -14,6 +14,6 @@ object AmountInput {
         if (text == null || !text.matches(Regex("[0-9]+(?:\\.[0-9]{1,2})?"))) return null
         val value = try { java.math.BigDecimal(text).movePointRight(2).longValueExact() }
             catch (_: ArithmeticException) { return null }
-        return value.takeIf { it in 0L..999999L }
+        return value.takeIf { it >= 0L }
     }
 }

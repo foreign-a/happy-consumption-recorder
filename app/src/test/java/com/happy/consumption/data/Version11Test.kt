@@ -12,7 +12,7 @@ class Version11Test {
         assertEquals(Amounts(0, 1, 0, 0), Amounts.adding("", "0.01", "", ""))
     }
     @Test fun invalidEditedAmountsStillReject() {
-        for (bad in listOf("-1", "10000", "1.001", "abc")) {
+        for (bad in listOf("-1", "92233720368547758.08", "1.001", "abc")) {
             try { Amounts.editing(item, bad, "", "", ""); fail(bad) } catch (_: UserOperationException) { }
         }
     }

@@ -1,6 +1,5 @@
 package com.happy.consumption.ui
 
-import android.os.SystemClock
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -185,21 +184,41 @@ class Version16UiTest {
         rule.onNodeWithTag("leave_save").assertDoesNotExist()
     }
 
-    @Test fun releasingBackspaceBeforeTwoSecondsDeletesOneCharacterAndCancelsDelayedRepeat() {
+    @Test fun releasingBackspaceBeforeFourHundredMillisecondsDeletesOneCharacterAndCancelsDelayedRepeat() {
         tapAmount(Meal.BREAKFAST)
         enter("1234.56")
-        rule.onNodeWithTag("key_backspace").performTouchInput { down(center) }
-        try {
-            SystemClock.sleep(1200)
-            assertEquals("¥1234.56", preview())
-        } finally {
-            rule.onNodeWithTag("key_backspace").performTouchInput { up() }
+        withControlledMainClock {
+            rule.onNodeWithTag("key_backspace").performTouchInput { down(center) }
+            try {
+                rule.mainClock.advanceTimeBy(200, ignoreFrameDuration = true)
+                assertEquals("¥1234.56", preview())
+            } finally {
+                rule.onNodeWithTag("key_backspace").performTouchInput { up() }
+            }
+            rule.mainClock.advanceTimeByFrame()
+            assertEquals("¥1234.5", preview())
+            // Cross the 400 ms deadline after release to catch an uncancelled repeat job.
+            rule.mainClock.advanceTimeBy(480)
+            assertEquals("¥1234.5", preview())
         }
-        assertEquals("¥1234.5", preview())
-        // Cross the original two-second deadline after release to catch an uncancelled job.
-        SystemClock.sleep(1100)
-        assertEquals("¥1234.5", preview())
         assertEquals(1000L, value(Meal.BREAKFAST))
+    }
+
+    private fun withControlledMainClock(action: () -> Unit) {
+        val autoAdvance = rule.mainClock.autoAdvance
+        rule.mainClock.autoAdvance = false
+        try { action() } finally { rule.mainClock.autoAdvance = autoAdvance }
+    }
+
+    private fun assertFirstHeldDeletion(initial: String) {
+        // Gesture delays and recomposition use MainTestClock under Compose instrumentation.
+        // 384 ms is the last whole 16 ms frame before the 400 ms repeat deadline.
+        rule.mainClock.advanceTimeBy(384)
+        assertEquals("Holding must not delete before 400 ms", initial, preview())
+        rule.mainClock.advanceTimeBy(16)
+        // Render the state changed by delay(400) on the next frame, before the 480 ms repeat.
+        rule.mainClock.advanceTimeByFrame()
+        assertEquals("Holding must delete the first character at 400 ms", initial.dropLast(1), preview())
     }
 
     private fun assertHeldBackspaceRepeatsAndStops(operation: DraftOperation, confirmation: ConfirmationPlan) {
@@ -213,23 +232,25 @@ class Version16UiTest {
         enter(input)
         val initial = prefix + input
         assertEquals(initial, preview())
-        rule.onNodeWithTag("key_backspace").performTouchInput { down(center) }
-        try {
-            SystemClock.sleep(1200)
-            assertEquals(initial, preview())
-            rule.waitUntil(5000) { preview() != initial }
-            val remaining = preview().removePrefix(prefix)
-            assertTrue("Holding must remove characters individually", remaining.isNotEmpty())
-            assertTrue("The retained input must be a prefix", input.startsWith(remaining))
-            assertTrue("Holding must delete at least one character", remaining.length < input.length)
-            rule.waitUntil(2000) { preview().removePrefix(prefix).length < remaining.length }
-            assertEquals(1000L, value(Meal.BREAKFAST))
-        } finally {
-            rule.onNodeWithTag("key_backspace").performTouchInput { up() }
+        withControlledMainClock {
+            rule.onNodeWithTag("key_backspace").performTouchInput { down(center) }
+            try {
+                assertFirstHeldDeletion(initial)
+                repeat(5) { index ->
+                    rule.mainClock.advanceTimeBy(80)
+                    assertEquals("Each further 80 ms must delete exactly one character",
+                        prefix + input.dropLast(index + 2), preview())
+                }
+                assertEquals(1000L, value(Meal.BREAKFAST))
+            } finally {
+                rule.onNodeWithTag("key_backspace").performTouchInput { up() }
+            }
+            rule.mainClock.advanceTimeByFrame()
+            val released = prefix + input.dropLast(6)
+            assertEquals("Releasing after repeat must not delete an extra character", released, preview())
+            rule.mainClock.advanceTimeBy(400)
+            assertEquals("Releasing must stop repeated deletion", released, preview())
         }
-        val released = preview()
-        SystemClock.sleep(350)
-        assertEquals("Releasing must stop repeated deletion", released, preview())
         assertEquals(1000L, value(Meal.BREAKFAST))
     }
 
@@ -250,4 +271,24 @@ class Version16UiTest {
 
     @Test fun heldBackspaceRepeatsAndStopsInSubtractQuick() =
         assertHeldBackspaceRepeatsAndStops(DraftOperation.SUBTRACT, ConfirmationPlan.QUICK)
+
+    @Test fun cancellingHeldBackspaceStopsRepeatingWithoutSavingTheDraft() {
+        tapAmount(Meal.BREAKFAST)
+        enter("123456789012345678901234")
+        val initial = preview()
+        withControlledMainClock {
+            rule.onNodeWithTag("key_backspace").performTouchInput { down(center) }
+            try {
+                assertFirstHeldDeletion(initial)
+            } finally {
+                rule.onNodeWithTag("key_backspace").performTouchInput { cancel() }
+            }
+            rule.mainClock.advanceTimeByFrame()
+            val cancelled = initial.dropLast(1)
+            assertEquals(cancelled, preview())
+            rule.mainClock.advanceTimeBy(400)
+            assertEquals("Cancelling the gesture must stop repeated deletion", cancelled, preview())
+        }
+        assertEquals(1000L, value(Meal.BREAKFAST))
+    }
 }

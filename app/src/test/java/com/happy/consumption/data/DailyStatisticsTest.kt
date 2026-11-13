@@ -18,7 +18,7 @@ class DailyStatisticsTest {
     }
     @Test fun zeroAndMaximumAmountsRemainFinite() {
         assertTrue(dailyShares(item.copy(breakfast=0,lunch=0,dinner=0,other=0),MoneyUnit.YUAN).all { it.fraction==0f })
-        assertTrue(dailyShares(item.copy(breakfast=999999,lunch=999999,dinner=999999,other=999999),MoneyUnit.YUAN).all { it.fraction==0.25f })
+        assertTrue(dailyShares(item.copy(breakfast=Long.MAX_VALUE,lunch=Long.MAX_VALUE,dinner=Long.MAX_VALUE,other=Long.MAX_VALUE),MoneyUnit.YUAN).all { it.fraction==0.25f })
     }
     @Test fun hexColorsAreNormalizedAndInvalidValuesRejected() {
         assertEquals("#AABBCC",ChartColors.normalize(" aabbcc "))

@@ -12,8 +12,8 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
         applicationId = "com.happy.consumption"
         minSdk = 26
         targetSdk = 36
-        versionCode = 8
-        versionName = "1.6"
+        versionCode = 9
+        versionName = "1.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     val signingFile = file(System.getProperty("user.home") + "/.happy-consumption-secrets/keystore.properties")

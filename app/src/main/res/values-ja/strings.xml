@@ -37,7 +37,7 @@
     <string name="dinner">夕食</string>
     <string name="other">その他</string>
     <string name="save">保存</string>
-    <string name="invalid_amount">金額は0から9999.99まで、小数点以下2桁以内で入力してください</string>
+    <string name="invalid_amount">金額は0以上、小数点以下2桁以内で、最小通貨単位の整数保存範囲内にしてください</string>
     <string name="invalid_date">今日以前の有効な日付を入力してください</string>
     <string name="date_exists">この日付の記録はすでに存在します</string>
     <string name="record_missing">記録が見つかりません。再試行してください</string>
@@ -84,7 +84,7 @@
     <string name="discard_changes">変更を破棄</string>
     <string name="keep_editing">編集を続ける</string>
     <string name="tap_amount_hint">新しい金額を入力。空欄は元の値を維持</string>
-    <string name="key_backspace">最後の桁を削除。2秒長押しで連続削除</string>
+    <string name="key_backspace">最後の桁を削除。400ミリ秒長押しで80ミリ秒ごとに1桁削除し、指を離すと停止</string>
     <string name="tab_home">ホーム</string>
     <string name="tab_user">ユーザー</string>
     <string name="calendar_expand">月表示を開く</string>
@@ -128,12 +128,12 @@
     <string name="confirm_careful">慎重モード</string>
     <string name="quick_description">別の金額またはキーと金額の外側をタップすると保存して操作を続行します。</string>
     <string name="careful_description">キー右上の確定で保存。領域外をタップすると保存・破棄・編集継続を選択します。</string>
-    <string name="quick_keypad_hint">別の金額・領域外で保存。⌫を2秒長押しで連続削除</string>
-    <string name="careful_keypad_hint">確定で保存、領域外で確認。⌫を2秒長押しで連続削除</string>
+    <string name="quick_keypad_hint">別の金額・領域外で保存。⌫を0.4秒長押しで連続削除</string>
+    <string name="careful_keypad_hint">確定で保存、領域外で確認。⌫を0.4秒長押しで連続削除</string>
     <string name="operation_add">加算モード</string>
     <string name="operation_subtract">減算モード</string>
     <string name="outside_confirm_hint">キーと金額以外をタップして確定</string>
     <string name="adjust_hint">金額をダブルタップで加減算切替、領域外をタップして確定</string>
     <string name="record_changed">記録が変更されました。入力を破棄して再編集してください。</string>
-    <string name="invalid_adjustment">計算後の金額は0～9999.99にしてください。負数にはできません。</string>
+    <string name="invalid_adjustment">計算後の金額は0以上で、最小通貨単位の整数保存範囲内にしてください。</string>
 </resources>

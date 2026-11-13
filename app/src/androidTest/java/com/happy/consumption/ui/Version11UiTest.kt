@@ -4,6 +4,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
 import android.accessibilityservice.AccessibilityService
 import com.happy.consumption.*
+import com.happy.consumption.R
 import com.happy.consumption.data.*
 import kotlinx.coroutines.runBlocking
 import org.junit.*
@@ -61,10 +62,11 @@ class Version12UiTest {
     }
     @Test fun invalidInputPreservesDraftAndRotationRetainsIt() {
         amount(Meal.BREAKFAST)
-        for(key in "10000") key(key.toString())
-        rule.onNodeWithTag("keypad_confirm").performClick();expect("金额须为 0 至 9999.99，最多两位小数")
+        val invalid = "92233720368547758.08"
+        for(key in invalid) key(key.toString())
+        rule.onNodeWithTag("keypad_confirm").performClick();expect(rule.activity.getString(R.string.invalid_amount))
         assertEquals(original,row());rule.onNodeWithTag("phone_keypad").assertExists()
-        repeat(5) { key("backspace") };key("0");key(".");key("0");key("1")
+        repeat(invalid.length) { key("backspace") };key("0");key(".");key("0");key("1")
         rule.activityRule.scenario.recreate();rule.onNodeWithTag("phone_keypad").assertExists()
         rule.onNodeWithTag("keypad_confirm").performClick()
         rule.waitUntil(15000) { row().breakfast==1L }

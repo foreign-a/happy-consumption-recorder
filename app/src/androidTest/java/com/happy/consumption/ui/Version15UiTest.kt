@@ -3,6 +3,7 @@ package com.happy.consumption.ui
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.happy.consumption.*
+import com.happy.consumption.R
 import com.happy.consumption.data.*
 import kotlinx.coroutines.runBlocking
 import org.junit.*
@@ -70,7 +71,7 @@ class Version15UiTest {
     @Test fun negativeSubtractIsRejectedAndStaysEditable() {
         setModes();rule.onNodeWithTag("amount_${id}_BREAKFAST").performTouchInput { doubleClick() }
         tap("key_2");tap("key_0");outside()
-        rule.waitUntil(10000) { rule.onAllNodesWithText("加减后的金额必须在0～9999.99之间，不能减成负数。").fetchSemanticsNodes().isNotEmpty() }
+        rule.waitUntil(10000) { rule.onAllNodesWithText(rule.activity.getString(R.string.invalid_adjustment)).fetchSemanticsNodes().isNotEmpty() }
         assertEquals(1000L,value());tap("key_backspace");outside();waitValue(800L)
     }
     @Test fun cautiousNavigationKeepsPendingAddUntilExplicitChoice() {

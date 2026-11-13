@@ -3,8 +3,8 @@ package com.happy.consumption.data
 data class SpendingShare(val meal: Meal, val amount: Long, val fraction: Float)
 fun dailyShares(item: ConsumptionItem, unit: MoneyUnit): List<SpendingShare> {
     val amounts = Meal.entries.map { if (item.currencies[it] == unit) item.value(it) else 0L }
-    val total = amounts.sum()
-    return Meal.entries.map { SpendingShare(it, amounts[it.ordinal], if (total == 0L) 0f else amounts[it.ordinal].toFloat() / total) }
+    val total = item.totalCents(unit).toDouble()
+    return Meal.entries.map { SpendingShare(it, amounts[it.ordinal], if (total == 0.0) 0f else (amounts[it.ordinal].toDouble() / total).toFloat()) }
 }
 object ChartColors {
     val defaults = listOf("#387EF5", "#F4A340", "#8D67D5", "#35A889")

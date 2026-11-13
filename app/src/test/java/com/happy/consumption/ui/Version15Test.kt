@@ -40,7 +40,7 @@ class Version15Test {
     }
     @Test fun underflowOverflowAndIncompleteInputsNeverBecomeWrites() {
         for(draft in listOf(amount(InlineDraft(original,Meal.BREAKFAST,operation=DraftOperation.SUBTRACT),"10.01"),
-            amount(InlineDraft(original.copy(breakfast=999999),Meal.BREAKFAST,operation=DraftOperation.ADD),"0.01"),
+            amount(InlineDraft(original.copy(breakfast=Long.MAX_VALUE),Meal.BREAKFAST,operation=DraftOperation.ADD),"0.01"),
             amount(InlineDraft(original,Meal.BREAKFAST,operation=DraftOperation.ADD),"0."))) {
             try { draft.amounts();fail() } catch(_:UserOperationException) { }
         }

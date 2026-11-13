@@ -16,7 +16,9 @@ class SecurityAndAmountTest {
     @Test fun amountBoundaries() {
         assertEquals(0L, AmountInput.cents("0")); assertEquals(1L, AmountInput.cents("0.01"))
         assertEquals(999999L, AmountInput.cents("9999.99"))
-        for (value in listOf("-0.01", "10000.00", "1.001", "", "NaN", "1e3")) {
+        assertEquals(1000000L, AmountInput.cents("10000.00"))
+        assertEquals(Long.MAX_VALUE, AmountInput.cents("92233720368547758.07"))
+        for (value in listOf("-0.01", "92233720368547758.08", "1.001", "", "NaN", "1e3")) {
             try { AmountInput.cents(value); fail("invalid amount accepted") }
             catch (e: UserOperationException) { assertEquals(UserError.INVALID_AMOUNT, e.reason) }
         }

@@ -110,7 +110,7 @@ fun mealLabel(meal: Meal) = when (meal) {
                 down.consume()
                 var repeated = false
                 val repeat = gestureScope.launch {
-                    delay(2000)
+                    delay(400)
                     while (isActive) {
                         repeated = true
                         delete()

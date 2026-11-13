@@ -2,7 +2,7 @@ package com.happy.consumption.data
 
 data class Amounts(val breakfast: Long, val lunch: Long, val dinner: Long, val other: Long) {
     fun validate() {
-        if (listOf(breakfast, lunch, dinner, other).any { it !in 0L..999999L }) throw UserOperationException(UserError.INVALID_AMOUNT)
+        if (listOf(breakfast, lunch, dinner, other).any { it < 0L }) throw UserOperationException(UserError.INVALID_AMOUNT)
     }
     companion object {
         fun parse(breakfast: String?, lunch: String?, dinner: String?, other: String?) =

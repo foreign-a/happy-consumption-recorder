@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.io.InputStream
-import java.math.BigDecimal
 import java.time.Clock
 
 data class DatasetImportResult(val imported: Int, val userMapping: Map<Long, Long>, val usernames: Map<Long, String>, val elapsedMillis: Long)
@@ -25,9 +24,7 @@ class DebugDatasetImporter(private val manager: UserManager, private val databas
         database.withTransaction {
             for (i in 0 until rows.length()) {
                 val row = rows.getJSONObject(i)
-                fun cents(key: String) = BigDecimal(row.getString(key)).movePointRight(2).longValueExact().also {
-                    if (it !in 0L..999999L) throw UserOperationException(UserError.INVALID_AMOUNT)
-                }
+                fun cents(key: String) = AmountInput.cents(row.getString(key))
                 val note = NoteEntity(userId = mapping.getValue(row.getLong("userId")), date = row.getString("date"),
                     breakfast = cents("breakfast"), lunch = cents("lunch"), dinner = cents("dinner"), other = cents("other"),
                     isManual = row.getBoolean("isManual"), updatedAt = clock.millis())

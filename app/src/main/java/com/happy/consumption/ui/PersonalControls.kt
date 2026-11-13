@@ -13,9 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.happy.consumption.R
 import com.happy.consumption.data.*
+import java.math.BigInteger
 import java.time.*
 
 @Composable fun ScheduleControl(store: PersonalSchedule, onSaved: () -> Unit) {
@@ -85,10 +87,10 @@ import java.time.*
             .ifEmpty { listOf(LocalMoneyUnit.current) }
         Text(stringResource(R.string.chart_hint), style = MaterialTheme.typography.bodySmall)
         for (unit in units) {
-            fun sum(row: ConsumptionItem?) = row?.let { item -> Meal.entries.filter { item.currencies[it] == unit }.sumOf { item.value(it) } } ?: 0L
-            Text(unit.format(rows.sumOf { sum(it) }), style = MaterialTheme.typography.titleMedium)
+            fun sum(row: ConsumptionItem?) = row?.totalCents(unit) ?: BigInteger.ZERO
+            Text(unit.format(rows.totalCents(unit)), style = MaterialTheme.typography.titleMedium)
             val values = (1..month.lengthOfMonth()).map { d -> sum(rows.firstOrNull { it.date == month.atDay(d).toString() }) }
-            val max = values.maxOrNull()?.coerceAtLeast(1L) ?: 1L
+            val max = values.maxOrNull()?.coerceAtLeast(BigInteger.ONE) ?: BigInteger.ONE
             val chartScroll = rememberScrollState()
             val density = androidx.compose.ui.platform.LocalDensity.current.density
             LaunchedEffect(monthText, unit) {
@@ -104,7 +106,7 @@ import java.time.*
                             contentDescription = "$date ${unit.format(value)}"; selected = day == index + 1
                         }, horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(Modifier.height(120.dp), contentAlignment = Alignment.BottomCenter) {
-                            Box(Modifier.width(24.dp).height((value.toFloat() / max * 114).coerceAtLeast(3f).dp)
+                            Box(Modifier.width(24.dp).height((value.toDouble() / max.toDouble() * 114).toFloat().coerceAtLeast(3f).dp)
                                 .background(if (day == index + 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer, androidx.compose.foundation.shape.RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)))
                         }
                         Text((index + 1).toString(), style = MaterialTheme.typography.labelSmall)
@@ -117,7 +119,8 @@ import java.time.*
         if (selected == null) Text(stringResource(R.string.empty_records))
         else {
             for (meal in Meal.entries) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(stringResource(mealLabel(meal))); Text(selected.currencies[meal].format(selected.value(meal)))
+                Text(stringResource(mealLabel(meal)), Modifier.weight(1f))
+                Text(selected.currencies[meal].format(selected.value(meal)), Modifier.weight(3f), textAlign = TextAlign.End)
             }
             Text(stringResource(R.string.daily_total) + " " + selected.totals(), style = MaterialTheme.typography.titleMedium)
             DailyPieStatistics(selected, colorStore)
