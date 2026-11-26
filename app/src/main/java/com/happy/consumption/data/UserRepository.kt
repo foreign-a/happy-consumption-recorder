@@ -12,6 +12,7 @@ interface RecordsRepository {
     val session: UserSession
     val changes: Flow<Unit>
     val dates: DatePolicy
+    suspend fun ledgerEntries(start: String, end: String): List<LedgerEntry> = emptyList()
     suspend fun recordDates(start: String, end: String): Set<String>
     suspend fun positionOf(date: String): Int?
     suspend fun snapshot(pages: Int): RecordSnapshot
@@ -34,7 +35,7 @@ class UserRepository(private val manager: UserManager, private val database: App
     private val owner: UserSession, private val clock: Clock = Clock.systemDefaultZone()) : RecordsRepository {
     override val dates = DatePolicy(clock)
     override val session get() = owner
-    override val changes = database.invalidationTracker.createFlow("notes").map { Unit }
+    override val changes = database.invalidationTracker.createFlow("notes", "ledger_entries", "custom_remarks").map { Unit }
     private val generator = AutoRecordGenerator(object : AutoRecordGateway {
         override suspend fun exists(userId: Long, date: String) = queryByDate(userId, date) != null
         override suspend fun insertZeroIfAbsent(note: NoteEntity): Long = manager.withCurrentUser(owner) { id ->
@@ -73,6 +74,73 @@ class UserRepository(private val manager: UserManager, private val database: App
             }
             permit.items.size
         }.also { LogHelper.info("Record", "Batch delete userId=$id count=$it result=success") }
+    }
+    override suspend fun ledgerEntries(start: String, end: String): List<LedgerEntry> = manager.withCurrentUser(owner) { id ->
+        require(start <= end)
+        database.ledger().entries(id, start, end).map { it.toEntry() }
+    }
+    suspend fun customRemarks(kind: EntryKind): List<String> = manager.withCurrentUser(owner) { id ->
+        database.ledger().remarks(id, kind.name)
+    }
+    suspend fun saveCustomRemark(kind: EntryKind, name: String) = manager.withCurrentUser(owner) { id ->
+        val normalized = name.trim()
+        if (normalized.isEmpty() || normalized.length > 100) throw UserOperationException(UserError.INVALID_REMARK)
+        database.ledger().insertRemark(CustomRemarkEntity(userId = id, kind = kind.name, name = normalized))
+        Unit
+    }
+    // Call once per tap with the same request ID for retries. Receipt and write share a transaction.
+    suspend fun recordScreenshot(requestId: String, amount: Long, kind: EntryKind, remark: ScreenshotRemark,
+        clickedAtMillis: Long = clock.millis()): Boolean {
+        val date = java.time.Instant.ofEpochMilli(clickedAtMillis).atZone(clock.zone).toLocalDate().toString()
+        if (requestId.isBlank() || requestId.length > 100) throw UserOperationException(UserError.UNCONFIRMED)
+        if (amount < 0) throw UserOperationException(UserError.INVALID_AMOUNT)
+        return manager.withCurrentUser(owner) { id ->
+            val currency = manager.defaultCurrency(id)
+            database.withTransaction {
+                if (database.ledger().insertReceipt(ScreenshotReceipt(id, requestId)) == -1L) return@withTransaction false
+                when (remark) {
+                    is ScreenshotRemark.BuiltInMeal -> {
+                        if (kind != EntryKind.EXPENSE) throw UserOperationException(UserError.INVALID_REMARK)
+                        var row = database.notes().queryByUserAndDate(id, date)
+                        if (row == null) {
+                            database.notes().insertIfAbsent(NoteEntity(userId = id, date = date, breakfast = 0,
+                                lunch = 0, dinner = 0, other = 0, isManual = true, updatedAt = clock.millis())
+                                .withCurrencies(EntryCurrencies.uniform(currency)))
+                            row = database.notes().queryByUserAndDate(id, date) ?: error("Missing inserted date")
+                        }
+                        val item = row.toItem()
+                        val old = item.value(remark.meal)
+                        if (old != 0L && item.currencies[remark.meal] != currency)
+                            throw UserOperationException(UserError.CURRENCY_CONFLICT)
+                        val sum = try { Math.addExact(old, amount) } catch (_: ArithmeticException) {
+                            throw UserOperationException(UserError.INVALID_ADJUSTMENT)
+                        }
+                        val values = Meal.entries.map { if (it == remark.meal) sum else item.value(it) }
+                        val units = item.currencies.replacing(remark.meal, currency)
+                        check(database.notes().updateByIdAndUser(row.id, id, values[0], values[1], values[2], values[3],
+                            true, clock.millis(), units.breakfast.name, units.lunch.name, units.dinner.name, units.other.name) == 1)
+                    }
+                    else -> {
+                        val text = when (remark) {
+                            ScreenshotRemark.OtherIncome -> {
+                                if (kind != EntryKind.INCOME) throw UserOperationException(UserError.INVALID_REMARK)
+                                "其他"
+                            }
+                            is ScreenshotRemark.Custom -> {
+                                if (remark.name != remark.name.trim() || remark.name.isEmpty() ||
+                                    database.ledger().hasRemark(id, kind.name, remark.name) != 1)
+                                    throw UserOperationException(UserError.INVALID_REMARK)
+                                remark.name
+                            }
+                            else -> error("Unexpected remark")
+                        }
+                        check(database.ledger().insertEntry(LedgerEntity(userId = id, requestId = requestId,
+                            date = date, kind = kind.name, amount = amount, currency = currency.name, remark = text, isOtherIncome = remark is ScreenshotRemark.OtherIncome)) != -1L)
+                    }
+                }
+                true
+            }
+        }
     }
     suspend fun shouldGenerate(userId: Long, today: String) = generator.shouldGenerate(userId, today)
     override suspend fun generatePastThirtyDays(): Int = manager.withCurrentUser(owner) { id ->

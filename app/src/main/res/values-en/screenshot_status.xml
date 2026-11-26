@@ -1,0 +1,5 @@
+<resources>
+    <string name="screenshot_already_recorded">This screenshot entry was already processed. No new entry was added. Check your records and close this dialog.</string>
+    <string name="capture_service_unavailable">Screenshot service is temporarily unavailable. Check accessibility settings and try again later.</string>
+    <string name="capture_retry">Screenshot was not completed. Please try again.</string>
+</resources>

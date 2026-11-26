@@ -12,8 +12,8 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
         applicationId = "com.happy.consumption"
         minSdk = 26
         targetSdk = 36
-        versionCode = 9
-        versionName = "1.7"
+        versionCode = 10
+        versionName = "1.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     val signingFile = file(System.getProperty("user.home") + "/.happy-consumption-secrets/keystore.properties")
@@ -29,7 +29,11 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
         }
     }
     buildTypes {
-        getByName("debug") { isMinifyEnabled = false; isShrinkResources = false }
+        getByName("debug") {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            providers.gradleProperty("qaApplicationIdSuffix").orNull?.let { applicationIdSuffix = it }
+        }
         getByName("release") {
             val optimize = providers.gradleProperty("releaseOptimization").orNull != "false"
             isMinifyEnabled = optimize
@@ -47,6 +51,7 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
 }
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
 dependencies {
+    implementation("cz.adaptech.tesseract4android:tesseract4android-openmp:4.9.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation(platform("androidx.compose:compose-bom:2026.03.00"))
     implementation("androidx.compose.ui:ui")

@@ -1,0 +1,12 @@
+<resources>
+    <string name="ledger_monthly_statistics">每月收支统计</string>
+    <string name="ledger_month_spending">本月总消费：%1$s</string>
+    <string name="ledger_month_income">本月总收入：%1$s</string>
+    <string name="ledger_day_spending">当天总消费：%1$s</string>
+    <string name="ledger_day_income">当天总收入：%1$s</string>
+    <string name="ledger_entries">当天独立流水</string>
+    <string name="ledger_entries_empty">当天没有独立流水</string>
+    <string name="ledger_income">收入</string>
+    <string name="ledger_expense">消费</string>
+    <string name="ledger_pie_scope">下方饼图仅展示早餐、午餐、晚餐和其他四项消费的占比，不含独立流水。</string>
+</resources>

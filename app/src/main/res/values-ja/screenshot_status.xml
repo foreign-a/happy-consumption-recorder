@@ -1,0 +1,5 @@
+<resources>
+    <string name="screenshot_already_recorded">この画面記録は処理済みです。新しい記録は追加されていません。記録を確認して閉じてください。</string>
+    <string name="capture_service_unavailable">画面記録サービスを利用できません。ユーザー補助の設定を確認し、しばらくしてから再試行してください。</string>
+    <string name="capture_retry">画面を取得できませんでした。もう一度お試しください。</string>
+</resources>

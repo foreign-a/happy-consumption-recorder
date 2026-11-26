@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application android:name=".HappyApplication" android:icon="@drawable/ic_launcher" android:roundIcon="@drawable/ic_launcher" android:allowBackup="false" android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/Theme.HappyConsumption" android:dataExtractionRules="@xml/data_extraction_rules" android:fullBackupContent="@xml/backup_rules">
+        <service android:name=".capture.CaptureAccessibilityService" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" android:exported="true" android:label="@string/capture_service_label">
+            <intent-filter><action android:name="android.accessibilityservice.AccessibilityService" /></intent-filter>
+            <meta-data android:name="android.accessibilityservice" android:resource="@xml/capture_accessibility_service" />
+        </service>
+        <service android:name=".capture.CaptureTileService" android:icon="@drawable/ic_launcher" android:label="@string/capture_tile_label" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:exported="true">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+        </service>
+        <activity android:name=".capture.CaptureGatewayActivity" android:exported="false" android:excludeFromRecents="true" android:autoRemoveFromRecents="true" android:taskAffinity="${applicationId}.capture.gateway" android:theme="@style/Theme.CaptureGateway" />
+        <activity android:name=".capture.CapturePreviewActivity" android:exported="false" android:excludeFromRecents="true" android:autoRemoveFromRecents="true" android:taskAffinity="${applicationId}.capture.preview" android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode" />
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

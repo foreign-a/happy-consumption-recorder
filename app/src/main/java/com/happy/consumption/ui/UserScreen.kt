@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.happy.consumption.R
 import com.happy.consumption.data.*
 
-@Composable fun UserScreen(username: String, auth: AppViewModel, language: LanguageSettings?, backup: BackupViewModel?, schedule: PersonalSchedule? = null, records: AllRecordsViewModel? = null) {
+@Composable fun UserScreen(username: String, auth: AppViewModel, language: LanguageSettings?, backup: BackupViewModel?, schedule: PersonalSchedule? = null, records: AllRecordsViewModel? = null, ledger: UserRepository? = null) {
     var deletingUser by remember { mutableStateOf(false) }
     var deletionPassword by remember { mutableStateOf("") }
     var deletionSession by remember { mutableStateOf<UserSession?>(null) }
@@ -26,10 +26,12 @@ import com.happy.consumption.data.*
         if (schedule != null && records != null) {
             EntryPreferencesControl(schedule, records)
             ScheduleControl(schedule) { records.refreshToday() }
-            MonthlyStatistics(records, schedule)
+            if (ledger != null) LedgerMonthlyStatistics(records, ledger.changes, ledger::ledgerEntries, schedule)
+            else MonthlyStatistics(records, schedule)
             HorizontalDivider()
         }
         if (backup != null) BackupControl(backup, loggedIn = true)
+        ScreenshotSetup()
         if (language != null) LanguageControl(language)
         CurrencyControl(auth)
         HorizontalDivider()

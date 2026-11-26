@@ -1,0 +1,20 @@
+<resources>
+    <string name="screenshot_entry_title">记录截图金额</string>
+    <string name="screenshot_amount">金额（可修改）</string>
+    <string name="screenshot_kind">选择收支类型</string>
+    <string name="screenshot_income">收入</string>
+    <string name="screenshot_expense">消费</string>
+    <string name="screenshot_remark_required">选择备注（必选）</string>
+    <string name="screenshot_other">其他</string>
+    <string name="screenshot_add_remark">添加自建备注</string>
+    <string name="screenshot_new_remark">新备注</string>
+    <string name="screenshot_save_remark">保存并选择</string>
+    <string name="screenshot_currency_conflict">该消费项已有不同币种的金额，无法相加。请先检查账户默认币种和当天记录。</string>
+    <string name="screenshot_record">记录</string>
+    <string name="screenshot_invalid_remark">备注无效，请检查后重试。</string>
+    <string name="screenshot_setup_title">截图记账设置</string>
+    <string name="screenshot_setup_instructions">先在无障碍设置中启用本应用的“截图记账”服务，再编辑系统快捷设置，将“截图记账”添加到快捷开关。需要记账时打开目标画面并点击该快捷开关。普通截图不会启动记账。截图仅在本机临时处理。</string>
+    <string name="screenshot_setup_unsupported">当前截图入口需要 Android 11 或更高版本；原有记账功能仍可使用。</string>
+    <string name="screenshot_setup_accessibility">打开无障碍设置</string>
+    <string name="screenshot_licenses">截图识别开源许可</string>
+</resources>

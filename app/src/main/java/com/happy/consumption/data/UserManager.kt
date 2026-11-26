@@ -15,7 +15,7 @@ import org.json.JSONObject
 import java.io.File
 
 data class UserSession(val id: Long, val username: String, val generation: Long)
-enum class UserError { EMPTY_NAME, SHORT_PASSWORD, DUPLICATE_NAME, INVALID_LOGIN, INVALID_PASSWORD, NO_SESSION, STORAGE, DATE_EXISTS, INVALID_AMOUNT, INVALID_DATE, RECORD_MISSING, UNCONFIRMED, BACKUP_INVALID, BACKUP_CONFLICT, RECORD_CHANGED, INVALID_ADJUSTMENT }
+enum class UserError { EMPTY_NAME, SHORT_PASSWORD, DUPLICATE_NAME, INVALID_LOGIN, INVALID_PASSWORD, NO_SESSION, STORAGE, DATE_EXISTS, INVALID_AMOUNT, INVALID_DATE, RECORD_MISSING, UNCONFIRMED, BACKUP_INVALID, BACKUP_CONFLICT, RECORD_CHANGED, INVALID_ADJUSTMENT, CURRENCY_CONFLICT, INVALID_REMARK }
 class UserOperationException(val reason: UserError) : Exception(reason.name)
 class AccessDeniedException : Exception("Access denied")
 
@@ -87,7 +87,13 @@ class UserManager(private val store: DataStore<Preferences>, private val databas
             }
             val active = accounts.find { it.id == prefs[currentKey] }
             if (active == null) store.edit { it.remove(currentKey) }
-            sessionState.value = active?.let { UserSession(it.id, it.username, ++generation) }
+            // Re-initialization by another entry point must not invalidate the same live session.
+            // A login, logout, or change of persisted identity still creates a new generation.
+            val current = sessionState.value
+            sessionState.value = active?.let {
+                if (current != null && current.id == it.id && current.username == it.username) current
+                else UserSession(it.id, it.username, ++generation)
+            }
         }
     }
     suspend fun exportBackup(owner: UserSession): ByteArray = withCurrentUser(owner) { id ->
@@ -101,7 +107,8 @@ class UserManager(private val store: DataStore<Preferences>, private val databas
                             addAll(page); offset += page.size
                         } while (page.size == 200)
                     }
-                    BackupAccount(credential, MoneyUnit.stored(prefs[currencyKey(credential.id)]), rows)
+                    BackupAccount(credential, MoneyUnit.stored(prefs[currencyKey(credential.id)]), rows,
+                        database.ledger().allEntries(credential.id), database.ledger().allRemarks(credential.id))
                 }
             }
             BackupDocument.encode(accounts).toByteArray(Charsets.UTF_8)
@@ -116,7 +123,8 @@ class UserManager(private val store: DataStore<Preferences>, private val databas
             var next = prefs[nextKey] ?: 1L
             val remapped = accounts.map { account ->
                 val id = next; next = Math.addExact(next, 1)
-                account.copy(credential = account.credential.copy(id = id), notes = account.notes.map { it.copy(userId = id) })
+                account.copy(credential = account.credential.copy(id = id), notes = account.notes.map { it.copy(userId = id) },
+                    entries = account.entries.map { it.copy(id = 0, userId = id) }, remarks = account.remarks.map { it.copy(id = 0, userId = id) })
             }
             // 已验证的导入计划先持久化，跨 Room / DataStore 中断可重复恢复。
             store.edit { it[nextKey] = next; it[pendingImportKey] = BackupDocument.encode(remapped) }
@@ -130,6 +138,11 @@ class UserManager(private val store: DataStore<Preferences>, private val databas
             accounts.forEach { account ->
                 database.identities().insert(UserIdentity(account.credential.id))
                 account.notes.forEach { database.notes().insertIfAbsent(it) }
+                account.remarks.forEach { database.ledger().insertRemark(it.copy(id = 0)) }
+                account.entries.forEach {
+                    database.ledger().insertEntry(it.copy(id = 0))
+                    database.ledger().insertReceipt(ScreenshotReceipt(account.credential.id, it.requestId))
+                }
             }
         }
         accounts.forEach { account ->

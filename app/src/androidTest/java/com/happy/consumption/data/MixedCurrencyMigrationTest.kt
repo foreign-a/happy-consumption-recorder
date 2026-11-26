@@ -13,13 +13,13 @@ import org.junit.Test
 import java.io.File
 
 class MixedCurrencyMigrationTest {
-    private suspend fun oldDatabase(default: MoneyUnit?) {
+    private suspend fun oldDatabase(default: MoneyUnit?, fromVersion: Int = 1) {
         val context=ApplicationProvider.getApplicationContext<Context>()
         val name="migration-${System.nanoTime()}.db"
         val root=File(context.cacheDir,"migration-${System.nanoTime()}").apply { mkdirs() }
         val scope=CoroutineScope(SupervisorJob()+Dispatchers.IO)
         val store=PreferenceDataStoreFactory.create(scope=scope,produceFile={ File(root,"users.preferences_pb") })
-        val schema=JSONObject(InstrumentationRegistry.getInstrumentation().context.assets.open("schema-v1.json").bufferedReader().use { it.readText() }).getJSONObject("database")
+        val schema=JSONObject(InstrumentationRegistry.getInstrumentation().context.assets.open("schema-v${fromVersion}.json").bufferedReader().use { it.readText() }).getJSONObject("database")
         val old=context.openOrCreateDatabase(name,Context.MODE_PRIVATE,null)
         val entities=schema.getJSONArray("entities")
         for(i in 0 until entities.length()) {
@@ -32,7 +32,7 @@ class MixedCurrencyMigrationTest {
         for(i in 0 until queries.length()) old.execSQL(queries.getString(i))
         old.execSQL("INSERT INTO user_identities(id) VALUES(7)")
         old.execSQL("INSERT INTO notes(id,userId,date,breakfast,lunch,dinner,other,isManual,updatedAt) VALUES(41,7,'2024-02-29',900,0,0,500,1,123456)")
-        old.version=1;old.close()
+        old.version=fromVersion;old.close()
         val salt=PasswordHasher.newSalt()
         val credential=Credential(7,"Legacy",PasswordHasher.hex(salt),PasswordHasher.hex(PasswordHasher.hashPassword("legacy-test-only",salt)),1)
         store.edit {
@@ -41,7 +41,7 @@ class MixedCurrencyMigrationTest {
             if(default!=null) it[stringPreferencesKey("currency_7")]=default.name
         }
         val before=store.data.first()
-        val db=Room.databaseBuilder(context,AppDatabase::class.java,name).addMigrations(MIGRATION_1_2).build()
+        val db=Room.databaseBuilder(context,AppDatabase::class.java,name).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
         try {
             val manager=UserManager(store,db,root);manager.initialize()
             val row=db.notes().queryByIdAndUser(41,7)!!
@@ -56,6 +56,7 @@ class MixedCurrencyMigrationTest {
             manager.login("Legacy","legacy-test-only");assertEquals(7L,manager.session.value!!.id)
         } finally { scope.cancel();db.close();context.deleteDatabase(name);root.deleteRecursively() }
     }
+    @Test fun version2CurrencyAndAllOldFieldsSurviveMigration() = runBlocking { oldDatabase(MoneyUnit.DOLLAR, 2) }
     @Test fun version11CurrencyAndAllOldFieldsSurviveMigration() = runBlocking { oldDatabase(MoneyUnit.DOLLAR) }
     @Test fun version10WithoutCurrencyMigratesToYuan() = runBlocking { oldDatabase(null) }
     @Test fun oldBackupAndNewMixedBackupRemainReadable() {

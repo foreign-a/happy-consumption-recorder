@@ -17,16 +17,22 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.happy.consumption.HappyApplication
 import com.happy.consumption.R
 import com.happy.consumption.data.UserRepository
+import com.happy.consumption.capture.ScreenshotSelection
 
 private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST") override fun <V : ViewModel> create(modelClass: Class<V>): V = build() as V
 }
-@Composable fun AppScreen(app: HappyApplication) {
+@Composable fun AppScreen(app: HappyApplication, screenshotSelection: ScreenshotSelection.Pending? = null, clearScreenshotAmount: (String) -> Unit = {}) {
     val auth: AppViewModel = viewModel(factory = remember { factory { AppViewModel(app.userManager) } })
     val backup: BackupViewModel = viewModel(factory = remember { factory { BackupViewModel(app.userManager, app.contentResolver) } })
     val ready by auth.ready.collectAsState()
     val failed by auth.startupFailed.collectAsState()
     val session by auth.session.collectAsState()
+    LaunchedEffect(ready, session, screenshotSelection) {
+        if (ready && screenshotSelection != null &&
+            (screenshotSelection.processId != ScreenshotSelection.processId || screenshotSelection.session != session))
+            clearScreenshotAmount(screenshotSelection.id)
+    }
     if (!ready) Box(Modifier.fillMaxSize().safeDrawingPadding(), contentAlignment = Alignment.Center) {
         if (failed) Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(stringResource(R.string.storage_error))
@@ -38,6 +44,7 @@ private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider
         key(current.generation) {
             val currency by remember(current) { app.userManager.currencyFor(current) }.collectAsState(initial = com.happy.consumption.data.MoneyUnit.YUAN)
             val schedule = remember(current) { com.happy.consumption.data.PersonalSchedule(app, current.id) }
+            val screenshotRepository = remember(current) { UserRepository(app.userManager, app.database, current, schedule.clock()) }
             val store = remember(current) { auth.recordsStoreFor(current) }
             val owner = remember { object : ViewModelStoreOwner { override val viewModelStore = store } }
             val records: AllRecordsViewModel = viewModel(viewModelStoreOwner = owner,
@@ -49,6 +56,10 @@ private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider
                 onDispose { lifecycle.removeObserver(observer) }
             }
             CompositionLocalProvider(LocalMoneyUnit provides currency) {
+                if (screenshotSelection != null && screenshotSelection.processId == ScreenshotSelection.processId && screenshotSelection.session == current) key(screenshotSelection.id) {
+                    ScreenshotEntryDialog(screenshotSelection.amountText, screenshotSelection.id, screenshotRepository,
+                        { clearScreenshotAmount(screenshotSelection.id) }) { records.refreshToday() }
+                }
                 var userPage by rememberSaveable { mutableStateOf(false) }
                 val listState = rememberLazyListState()
                 val homeState = rememberSaveableStateHolder()
@@ -66,7 +77,7 @@ private fun <T : ViewModel> factory(build: () -> T) = object : ViewModelProvider
                         }
                     }
                     Box(Modifier.weight(1f)) {
-                        if (userPage) UserScreen(current.username, auth, app.language, backup, schedule, records)
+                        if (userPage) UserScreen(current.username, auth, app.language, backup, schedule, records, screenshotRepository)
                         else homeState.SaveableStateProvider("home") { AllRecordsScreen(records, current.username, auth, app.language, backup, listState, schedule) }
                     }
                 }

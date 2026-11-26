@@ -1,0 +1,20 @@
+<resources>
+    <string name="screenshot_entry_title">スクリーンショットの金額を記録</string>
+    <string name="screenshot_amount">金額（修正可）</string>
+    <string name="screenshot_kind">収入または支出を選択</string>
+    <string name="screenshot_income">収入</string>
+    <string name="screenshot_expense">支出</string>
+    <string name="screenshot_remark_required">メモを選択（必須）</string>
+    <string name="screenshot_other">その他</string>
+    <string name="screenshot_add_remark">メモを追加</string>
+    <string name="screenshot_new_remark">新しいメモ</string>
+    <string name="screenshot_save_remark">保存して選択</string>
+    <string name="screenshot_currency_conflict">この項目には異なる通貨の金額があるため加算できません。既定通貨と本日の記録を確認してください。</string>
+    <string name="screenshot_record">記録</string>
+    <string name="screenshot_invalid_remark">メモを確認して、もう一度お試しください。</string>
+    <string name="screenshot_setup_title">スクリーンショット記録の設定</string>
+    <string name="screenshot_setup_instructions">ユーザー補助の設定でこのアプリのスクリーンショットサービスを有効にし、クイック設定を編集して記録用のタイルを追加してください。記録したい画面でそのタイルを押します。通常のスクリーンショットでは記録画面は開きません。画像は端末内で一時的に処理します。</string>
+    <string name="screenshot_setup_unsupported">現在、スクリーンショット記録には Android 11 以降が必要です。従来の記録機能は引き続き使用できます。</string>
+    <string name="screenshot_setup_accessibility">ユーザー補助の設定を開く</string>
+    <string name="screenshot_licenses">画像認識のライセンス</string>
+</resources>

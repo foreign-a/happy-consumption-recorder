@@ -1,0 +1,12 @@
+<resources>
+    <string name="ledger_monthly_statistics">Monthly income and spending</string>
+    <string name="ledger_month_spending">Monthly spending: %1$s</string>
+    <string name="ledger_month_income">Monthly income: %1$s</string>
+    <string name="ledger_day_spending">Daily spending: %1$s</string>
+    <string name="ledger_day_income">Daily income: %1$s</string>
+    <string name="ledger_entries">Independent entries for this day</string>
+    <string name="ledger_entries_empty">No independent entries on this day</string>
+    <string name="ledger_income">Income</string>
+    <string name="ledger_expense">Spending</string>
+    <string name="ledger_pie_scope">The chart below shows only the four meal categories; independent entries are excluded.</string>
+</resources>

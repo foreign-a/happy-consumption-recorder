@@ -1,0 +1,5 @@
+<resources>
+    <string name="screenshot_already_recorded">此截图记录已处理，本次未新增。请核对已有记录后关闭。</string>
+    <string name="capture_service_unavailable">截图服务暂不可用，请检查无障碍设置并稍后重试。</string>
+    <string name="capture_retry">截图未完成，请稍后重试。</string>
+</resources>

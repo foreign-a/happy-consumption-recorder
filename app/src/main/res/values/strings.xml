@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">快乐消费记录</string>
+    <string name="app_name">快了记账</string>
     <string name="all_records">全部记录</string>
     <string name="record_count">共 %1$d 条</string>
     <string name="modify">修改</string>

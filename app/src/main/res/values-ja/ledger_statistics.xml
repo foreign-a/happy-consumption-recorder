@@ -1,0 +1,12 @@
+<resources>
+    <string name="ledger_monthly_statistics">月別収支統計</string>
+    <string name="ledger_month_spending">今月の支出合計：%1$s</string>
+    <string name="ledger_month_income">今月の収入合計：%1$s</string>
+    <string name="ledger_day_spending">当日の支出合計：%1$s</string>
+    <string name="ledger_day_income">当日の収入合計：%1$s</string>
+    <string name="ledger_entries">当日の個別明細</string>
+    <string name="ledger_entries_empty">当日の個別明細はありません</string>
+    <string name="ledger_income">収入</string>
+    <string name="ledger_expense">支出</string>
+    <string name="ledger_pie_scope">下の円グラフは朝食・昼食・夕食・その他の4項目のみの割合です。個別明細は含みません。</string>
+</resources>

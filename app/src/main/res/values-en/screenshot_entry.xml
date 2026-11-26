@@ -1,0 +1,20 @@
+<resources>
+    <string name="screenshot_entry_title">Record screenshot amount</string>
+    <string name="screenshot_amount">Amount (editable)</string>
+    <string name="screenshot_kind">Choose income or expense</string>
+    <string name="screenshot_income">Income</string>
+    <string name="screenshot_expense">Expense</string>
+    <string name="screenshot_remark_required">Choose a note (required)</string>
+    <string name="screenshot_other">Other</string>
+    <string name="screenshot_add_remark">Add a custom note</string>
+    <string name="screenshot_new_remark">New note</string>
+    <string name="screenshot_save_remark">Save and select</string>
+    <string name="screenshot_currency_conflict">This category already contains a different currency. Check the account default and today’s entry before adding.</string>
+    <string name="screenshot_record">Record</string>
+    <string name="screenshot_invalid_remark">Invalid note. Check it and try again.</string>
+    <string name="screenshot_setup_title">Screenshot capture setup</string>
+    <string name="screenshot_setup_instructions">Enable this app’s screenshot service in Accessibility settings. Then edit Quick Settings and add the screenshot capture tile. Open the desired screen and tap that tile to record an amount. Ordinary screenshots do not start recording. Images are processed temporarily on this device.</string>
+    <string name="screenshot_setup_unsupported">Screenshot capture currently requires Android 11 or later. Existing accounting functions remain available.</string>
+    <string name="screenshot_setup_accessibility">Open Accessibility settings</string>
+    <string name="screenshot_licenses">Screenshot recognition licenses</string>
+</resources>

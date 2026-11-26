@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Happy Spending</string>
+    <string name="app_name">Kuaile Ledger</string>
     <string name="all_records">All records</string>
     <string name="record_count">Total: %1$d</string>
     <string name="modify">Edit</string>

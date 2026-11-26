@@ -1,0 +1,11 @@
+Offline OCR third-party notices
+
+Tesseract4Android 4.9.0 OpenMP: Copyright 2019 Adaptech s.r.o., Robert Poesel. Apache License 2.0; see apache-2.0.txt. Source: https://github.com/adaptech-cz/Tesseract4Android/tree/4.9.0
+
+Tesseract OCR 5.5.1 and tessdata_fast English model: Apache License 2.0; see apache-2.0.txt. Sources: https://github.com/tesseract-ocr/tesseract/tree/5.5.1 and https://github.com/tesseract-ocr/tessdata_fast
+
+Leptonica 1.85.0: Copyright (C) 2001-2020 Leptonica. See leptonica.txt. Source: https://github.com/DanBloomberg/leptonica/tree/1.85.0
+
+libpng 1.6.48: See libpng.txt. Source: https://github.com/pnggroup/libpng/tree/v1.6.48
+
+This software is based in part on the work of the Independent JPEG Group. libjpeg 9f copyright and terms: see ijg-readme.txt. Source: https://github.com/libjpeg-turbo/ijg/tree/jpeg-9f

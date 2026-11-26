@@ -23,10 +23,13 @@
 
 ## 交付
 
-- APK：[v1.4 APK](https://github.com/foreign-a/happy-consumption-recorder/releases/download/v1.4/app-release_1.4.apk)
+- APK：`HappyConsumption/release/1.4/app-release_1.4.apk`
 - 大小：2,266,374字节（2.16 MiB）。
 - SHA-256：`2cc9b47e268edbdaeb1ae1b480835041c60fc9dcf6656f4a4cbaa53d9d2e9c89`
 - 同目录提供更新说明和`.sha256`校验文件。
-- 测试和升级原始证据保存在维护者本地工作区，不包含在公开仓库中。
+- 原始测试结果、构建日志、源文件校验、升级、签名与截图见`docs/reports/evidence/version-1.4/`。
 
-本版以GitHub v1.4发布，可直接覆盖旧正式版本安装。
+本轮为本地安装包交付，可直接覆盖旧正式版本安装。
+
+
+2026-10-28：已通过foreign-a同步GitHub仓库、README与AGENTS.md并正式发布[v1.4](https://github.com/foreign-a/happy-consumption-recorder/releases/tag/v1.4)，远端源码及下载附件核验通过。未单独发布v1.3系列。

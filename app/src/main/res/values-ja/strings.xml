@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">楽しい支出記録</string>
+    <string name="app_name">快了家計簿</string>
     <string name="all_records">すべての記録</string>
     <string name="record_count">全 %1$d 件</string>
     <string name="modify">変更</string>

@@ -22,6 +22,8 @@ fun errorMessage(error: Exception): Int = when (error) {
         UserError.UNCONFIRMED -> R.string.confirmation_required
         UserError.BACKUP_INVALID -> R.string.backup_invalid
         UserError.BACKUP_CONFLICT -> R.string.backup_conflict
+        UserError.CURRENCY_CONFLICT -> R.string.screenshot_currency_conflict
+        UserError.INVALID_REMARK -> R.string.screenshot_invalid_remark
     }
     else -> R.string.storage_error
 }
